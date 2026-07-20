@@ -1,0 +1,86 @@
+[
+  {
+    "id": "duracion_test",
+    "patrones": [
+      "cuanto dura",
+      "cuanto tiempo",
+      "cuantos minutos",
+      "duracion del test",
+      "cuanto demora"
+    ],
+    "respuesta": "El test suele tomar entre 10 y 15 minutos, dependiendo de cuántas preguntas te formule cada área (el sistema recorta preguntas automáticamente si tus respuestas ya son consistentes)."
+  },
+  {
+    "id": "privacidad_datos",
+    "patrones": [
+      "mis datos son privados",
+      "privacidad",
+      "quien ve mis respuestas",
+      "guardan mis datos",
+      "es confidencial"
+    ],
+    "respuesta": "Tus respuestas se usan únicamente para calcular tu recomendación vocacional. Si realizas el test como invitado, el intento no queda asociado a ninguna cuenta identificable."
+  },
+  {
+    "id": "diferencia_metodos",
+    "patrones": [
+      "diferencia entre los metodos",
+      "diferencia entre metodo 1 y metodo 2",
+      "que diferencia hay entre el formulario y el chatbot",
+      "cual es mejor el formulario o el chatbot",
+      "en que se diferencian"
+    ],
+    "respuesta": "El formulario y el chatbot son dos formas de responder exactamente las mismas preguntas: el formulario usa una pantalla con barra de progreso y el chatbot una conversación tipo chat. Ambos aplican la misma lógica adaptativa y producen el mismo resultado ante las mismas respuestas."
+  },
+  {
+    "id": "como_se_calcula",
+    "patrones": [
+      "como se calcula la recomendacion",
+      "como calculan mi resultado",
+      "que algoritmo usan",
+      "como funciona el calculo",
+      "que es mahalanobis"
+    ],
+    "respuesta": "Tus respuestas se convierten en un perfil de 17 áreas, que se compara estadísticamente (usando la Distancia de Mahalanobis) contra el perfil de las 37 carreras de la UNA Puno. Las carreras con menor distancia estadística son las más afines a ti."
+  },
+  {
+    "id": "costo_test",
+    "patrones": [
+      "el test es gratis",
+      "cuanto cuesta",
+      "tiene algun costo",
+      "es pago"
+    ],
+    "respuesta": "El test es 100% gratuito, tanto en el método formulario como en el chatbot."
+  },
+  {
+    "id": "repetir_test",
+    "patrones": [
+      "puedo volver a hacer el test",
+      "puedo repetir el test completo",
+      "puedo hacerlo de nuevo",
+      "se puede rehacer el test"
+    ],
+    "respuesta": "Sí, puedes realizar el test las veces que quieras. Cada intento se calcula de forma independiente sobre las respuestas que des en ese momento."
+  },
+  {
+    "id": "cuantas_carreras",
+    "patrones": [
+      "cuantas carreras evaluan",
+      "cuantas carreras tiene la universidad",
+      "que carreras evaluan",
+      "cuantas carreras hay"
+    ],
+    "respuesta": "El sistema evalúa tu afinidad contra las 37 carreras que ofrece la Universidad Nacional del Altiplano (UNA Puno)."
+  },
+  {
+    "id": "vinculante",
+    "patrones": [
+      "es una decision definitiva",
+      "es obligatorio seguir la recomendacion",
+      "tengo que estudiar lo que me recomiendan",
+      "es vinculante"
+    ],
+    "respuesta": "No. Este test es una herramienta de orientación vocacional, no una decisión vinculante: te da información basada en tus respuestas, pero la decisión final siempre es tuya."
+  }
+]

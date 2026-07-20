@@ -1,0 +1,265 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Lexend", var(--font-sans);
+
+  /*
+   * Rediseño "Superhuman-inspired" (ver docs/design/superhuman-prompt.md):
+   * la marca vive en modo oscuro por defecto (fondo #1B1938 + acentos
+   * azul/morado). El modo claro que sigue disponible desde el toggle del
+   * header reutiliza los MISMOS matices de azul/morado, solo reajustando
+   * saturación/luminosidad para mantener contraste AA sobre fondo claro,
+   * de modo que cambiar de tema no cambia de identidad visual.
+   */
+  --background: 240 33% 98%;
+  --foreground: 245 35% 12%;
+  --muted: 240 25% 95%;
+  --muted-foreground: 240 10% 42%;
+  --border: 240 20% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 245 35% 12%;
+
+  /* Azul #6E8FFF, oscurecido para AA sobre blanco. */
+  --primary: 226 90% 58%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Morado #8B5CF6, oscurecido para AA sobre blanco. */
+  --accent: 258 80% 56%;
+  --accent-foreground: 0 0% 100%;
+
+  --ring: 226 90% 58%;
+
+  /* Tokens de vidrio (glassmorphism) — ver clase .glass-panel más abajo. */
+  --glass-bg: 240 30% 94%;
+  --glass-bg-alpha: 0.55;
+  --glass-border-alpha: 0.6;
+}
+
+.dark {
+  /* Fondo principal #1B1938 del brief. */
+  --background: 244 38% 16%;
+  /* Texto #F5F5F5 / secundario #C9C9D1 del brief. */
+  --foreground: 0 0% 96%;
+  --muted: 244 30% 22%;
+  --muted-foreground: 240 8% 80%;
+  --border: 244 22% 30%;
+  --card: 244 32% 20%;
+  --card-foreground: 0 0% 96%;
+
+  /* Azul #6E8FFF tal cual, protagonista en oscuro. */
+  --primary: 226 100% 72%;
+  --primary-foreground: 244 40% 12%;
+
+  /* Morado #8B5CF6 tal cual, acento secundario. */
+  --accent: 258 90% 66%;
+  --accent-foreground: 0 0% 100%;
+
+  --ring: 226 100% 72%;
+
+  /* Tarjetas glass: rgba(255,255,255,.10) con borde rgba(255,255,255,.20). */
+  --glass-bg: 0 0% 100%;
+  --glass-bg-alpha: 0.1;
+  --glass-border-alpha: 0.2;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 0.5rem 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/*
+ * Fase 9d — red de seguridad de foco visible.
+ * La mayoría de componentes interactivos (Button, Input, Accordion, chips
+ * del chatbot) ya definen su propio anillo de foco vía Tailwind
+ * (`focus-visible:ring-2 ...`). Esta regla global cubre los elementos
+ * interactivos "sueltos" (botones de navegación del formulario, enlaces de
+ * tarjetas de historial/carreras, botones de chips) que no siempre repiten
+ * esas clases, para garantizar foco visible en TODA la app sin excepción,
+ * tal como exige el criterio de aceptación de la Fase 9d.
+ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="radio"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/*
+ * Fase 8 — "Descargar PDF" del resultado.
+ * El entorno de esta fase no tiene acceso de red al registro de npm para
+ * instalar una librería de generación de PDF (ver decisión técnica en
+ * docs/fases/fase-8-resultados-avanzados.md, sección 3). Se optó por el
+ * enfoque nativo del navegador: "Guardar como PDF" del diálogo de impresión,
+ * ocultando navegación/botones y dejando solo el contenido de
+ * #resultado-imprimible (Top 5 + detalle de la carrera recomendada).
+ */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  #resultado-imprimible {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+}
+
+/*
+ * Micro-interacciones globales — rediseño "interfaz más amigable".
+ * Botones y tarjetas responden al tacto/hover con un feedback sutil
+ * (no solo cambio de color), y el contenido nuevo entra con un fundido
+ * suave en vez de aparecer de golpe. Todo respeta `prefers-reduced-motion`
+ * (ver regla arriba, que ya fuerza duraciones a ~0 en ese caso).
+ */
+button:not(:disabled):active,
+a[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.97);
+}
+
+.tarjeta-interactiva {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.tarjeta-interactiva:hover {
+  box-shadow: 0 8px 24px -8px hsl(var(--primary) / 0.18);
+  transform: translateY(-2px);
+}
+
+@keyframes entrada-suave {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animar-entrada {
+  animation: entrada-suave 0.25s ease-out;
+}
+
+/* ======================================================================
+ * Rediseño "Superhuman-inspired" — glassmorphism, gradientes, partículas
+ * ====================================================================== */
+
+/*
+ * Tarjeta de vidrio: fondo semitransparente + blur + borde translúcido,
+ * tal como pide el brief (rgba(255,255,255,.10) / rgba(255,255,255,.20)
+ * en oscuro). En claro usa una versión más sutil sobre fondo lavanda muy
+ * claro para que el blur siga siendo perceptible sin perder contraste.
+ */
+.glass-panel {
+  background-color: hsl(var(--glass-bg) / var(--glass-bg-alpha));
+  border: 1px solid hsl(0 0% 100% / var(--glass-border-alpha));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.dark .glass-panel:hover {
+  background-color: hsl(0 0% 100% / 0.18);
+}
+
+.light .glass-panel:hover,
+:root:not(.dark) .glass-panel:hover {
+  background-color: hsl(var(--glass-bg) / 0.75);
+}
+
+/* Fondo hero: gradiente azul→morado + resplandores radiales, como pide
+ * el brief ("gradiente azul + morado", "efectos luminosos"). */
+.fondo-hero {
+  background-image:
+    radial-gradient(circle at 15% 20%, hsl(226 100% 65% / 0.35), transparent 45%),
+    radial-gradient(circle at 85% 15%, hsl(258 90% 60% / 0.35), transparent 45%),
+    radial-gradient(circle at 50% 100%, hsl(258 90% 45% / 0.25), transparent 55%),
+    linear-gradient(180deg, hsl(244 40% 14%), hsl(244 45% 9%));
+}
+
+/* Texto con relleno de gradiente azul→morado, usado en el titular hero. */
+.texto-degradado {
+  background-image: linear-gradient(90deg, hsl(226 100% 72%), hsl(258 90% 68%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Partículas ambientales del hero: puntos que suben lentamente y se
+ * desvanecen. Se generan varias copias con distinto retraso/posición
+ * desde el componente; esta clase solo define el movimiento compartido. */
+@keyframes particula-flotar {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-140px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.particula {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, hsl(226 100% 78%) 0%, transparent 70%);
+  animation: particula-flotar linear infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particula {
+    animation: none;
+    opacity: 0.25;
+  }
+}

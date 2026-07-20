@@ -1,0 +1,69 @@
+# Fase 9f — orquestación del stack completo (PostgreSQL + backend FastAPI +
+# frontend Next.js) para desplegar en cualquier host con Docker (VPS, EC2,
+# Droplet, etc.) o para levantar un entorno de revisión idéntico al de
+# producción en una máquina local.
+#
+# Uso:
+#   1. cp .env.example .env   (y completar los valores reales/secretos)
+#   2. docker compose up -d --build
+#   3. Frontend en http://<host>:3000 — Backend en http://<host>:8000
+#
+# Ver docs/fases/fase-9f-performance-despliegue.md para el detalle de cómo
+# se verificó este despliegue y las alternativas de hosting gestionado
+# (Render/Railway/Fly.io) si no se cuenta con un servidor propio.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vocacional}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta definir POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: ${POSTGRES_DB:-vocacional_db}
+    volumes:
+      - vocacional_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vocacional}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-vocacional}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-vocacional_db}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?falta definir JWT_SECRET_KEY en .env}
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  vocacional_db_data:

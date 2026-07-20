@@ -1,0 +1,70 @@
+[
+  {
+    "key": "desarrollo_personal",
+    "label": "Desarrollo Personal"
+  },
+  {
+    "key": "ciencias_sociales",
+    "label": "Ciencias Sociales"
+  },
+  {
+    "key": "educacion_fisica",
+    "label": "Educación Física"
+  },
+  {
+    "key": "arte_cultura",
+    "label": "Arte y Cultura"
+  },
+  {
+    "key": "comunicacion",
+    "label": "Comunicación"
+  },
+  {
+    "key": "castellano_segunda",
+    "label": "Castellano (segunda lengua)"
+  },
+  {
+    "key": "ingles_extranjero",
+    "label": "Inglés (extranjero)"
+  },
+  {
+    "key": "matematica",
+    "label": "Matemática"
+  },
+  {
+    "key": "ciencia_tecnologia",
+    "label": "Ciencia y Tecnología"
+  },
+  {
+    "key": "educacion_trabajo",
+    "label": "Educación para el Trabajo"
+  },
+  {
+    "key": "pensamiento_analitico",
+    "label": "Pensamiento Analítico y Crítico"
+  },
+  {
+    "key": "alfabetizacion_digital",
+    "label": "Alfabetización Digital e IA"
+  },
+  {
+    "key": "adaptabilidad_resiliencia",
+    "label": "Adaptabilidad y Resiliencia"
+  },
+  {
+    "key": "comunicacion_efectiva",
+    "label": "Comunicación Efectiva"
+  },
+  {
+    "key": "inteligencia_emocional",
+    "label": "Inteligencia Emocional e Interpersonal"
+  },
+  {
+    "key": "curiosidad_aprendizaje",
+    "label": "Curiosidad y Aprendizaje Continuo"
+  },
+  {
+    "key": "liderazgo_equipo",
+    "label": "Liderazgo y Trabajo en Equipo"
+  }
+]

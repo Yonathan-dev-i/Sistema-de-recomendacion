@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    /*
+     * Red de seguridad para TS2882 ("Cannot find module or type declarations
+     * for side-effect import of './globals.css'"): TypeScript 6.0 activó por
+     * defecto `noUncheckedSideEffectImports`, más estricto de lo que Next.js
+     * soporta hoy con imports de CSS (issue conocido:
+     * https://github.com/microsoft/TypeScript/issues/63181). El proyecto usa
+     * TS 5.x (ver package.json), pero si el editor o un futuro upgrade usa
+     * TS 6+, esta opción evita el falso error sin afectar el chequeo real
+     * de tipos del resto del código.
+     */
+    "noUncheckedSideEffectImports": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
