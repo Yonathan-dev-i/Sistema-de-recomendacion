@@ -90,7 +90,7 @@ def resultado_top5() -> list[dict]:
         "¿puedo volver a hacer el test?",
     ],
 )
-def test_chatbot_responde_faqs_sin_salirse_del_flujo(
+async def test_chatbot_responde_faqs_sin_salirse_del_flujo(
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
     pregunta: str,
@@ -100,7 +100,7 @@ def test_chatbot_responde_faqs_sin_salirse_del_flujo(
     pregunta_actual_antes = estado["pregunta_actual_id"]
     fase_antes = estado["fase"]
 
-    mensaje, listo = procesar_mensaje(
+    mensaje, listo = await procesar_mensaje(
         estado, preguntas_por_area, preguntas_textos, pregunta
     )
 
@@ -126,12 +126,17 @@ def test_al_menos_5_intents_distintos_configurados() -> None:
 # --- Criterio 2: seguimiento post-resultado con datos reales del Top 5 ------
 
 
-def test_por_que_esa_carrera_usa_datos_reales_del_top5(resultado_top5: list[dict]) -> None:
+async def test_por_que_esa_carrera_usa_datos_reales_del_top5(resultado_top5: list[dict]) -> None:
     estado = {
         "ultimo_resultado": resultado_top5,
-        "analitica": {"intents_disparados": [], "respuestas_invalidas": 0, "area_abandono": None},
+        "analitica": {
+            "intents_disparados": [],
+            "respuestas_invalidas": 0,
+            "area_abandono": None,
+            "respuestas_ia_usadas": 0,
+        },
     }
-    respuesta = responder_pregunta_seguimiento("¿por qué me recomendaste esa carrera?", estado)
+    respuesta = await responder_pregunta_seguimiento("¿por qué me recomendaste esa carrera?", estado)
 
     top1 = resultado_top5[0]
     assert top1["nombre"] in respuesta
@@ -139,12 +144,17 @@ def test_por_que_esa_carrera_usa_datos_reales_del_top5(resultado_top5: list[dict
     assert any(f in respuesta for f in top1["fortalezas"])
 
 
-def test_comparacion_conversacional_usa_datos_reales(resultado_top5: list[dict]) -> None:
+async def test_comparacion_conversacional_usa_datos_reales(resultado_top5: list[dict]) -> None:
     estado = {
         "ultimo_resultado": resultado_top5,
-        "analitica": {"intents_disparados": [], "respuestas_invalidas": 0, "area_abandono": None},
+        "analitica": {
+            "intents_disparados": [],
+            "respuestas_invalidas": 0,
+            "area_abandono": None,
+            "respuestas_ia_usadas": 0,
+        },
     }
-    respuesta = responder_pregunta_seguimiento(
+    respuesta = await responder_pregunta_seguimiento(
         "compara Ingeniería de Sistemas con Ingeniería Civil", estado
     )
 
@@ -154,33 +164,48 @@ def test_comparacion_conversacional_usa_datos_reales(resultado_top5: list[dict])
     assert "80.1" in respuesta
 
 
-def test_comparacion_sin_dos_carreras_identificadas_pide_aclaracion(
+async def test_comparacion_sin_dos_carreras_identificadas_pide_aclaracion(
     resultado_top5: list[dict],
 ) -> None:
     estado = {
         "ultimo_resultado": resultado_top5,
-        "analitica": {"intents_disparados": [], "respuestas_invalidas": 0, "area_abandono": None},
+        "analitica": {
+            "intents_disparados": [],
+            "respuestas_invalidas": 0,
+            "area_abandono": None,
+            "respuestas_ia_usadas": 0,
+        },
     }
-    respuesta = responder_pregunta_seguimiento("compara dos carreras", estado)
+    respuesta = await responder_pregunta_seguimiento("compara dos carreras", estado)
     assert "Dime cuáles dos carreras" in respuesta
 
 
-def test_post_resultado_tambien_responde_faqs(resultado_top5: list[dict]) -> None:
+async def test_post_resultado_tambien_responde_faqs(resultado_top5: list[dict]) -> None:
     estado = {
         "ultimo_resultado": resultado_top5,
-        "analitica": {"intents_disparados": [], "respuestas_invalidas": 0, "area_abandono": None},
+        "analitica": {
+            "intents_disparados": [],
+            "respuestas_invalidas": 0,
+            "area_abandono": None,
+            "respuestas_ia_usadas": 0,
+        },
     }
-    respuesta = responder_pregunta_seguimiento("¿mis datos son privados?", estado)
+    respuesta = await responder_pregunta_seguimiento("¿mis datos son privados?", estado)
     assert "confidencial" not in respuesta or "recomendación" in respuesta
     assert len(estado["analitica"]["intents_disparados"]) == 1
 
 
-def test_fallback_fijo_post_resultado_no_inventa_respuesta(resultado_top5: list[dict]) -> None:
+async def test_fallback_fijo_post_resultado_no_inventa_respuesta(resultado_top5: list[dict]) -> None:
     estado = {
         "ultimo_resultado": resultado_top5,
-        "analitica": {"intents_disparados": [], "respuestas_invalidas": 0, "area_abandono": None},
+        "analitica": {
+            "intents_disparados": [],
+            "respuestas_invalidas": 0,
+            "area_abandono": None,
+            "respuestas_ia_usadas": 0,
+        },
     }
-    respuesta = responder_pregunta_seguimiento("asdkjhaskdjh sin sentido", estado)
+    respuesta = await responder_pregunta_seguimiento("asdkjhaskdjh sin sentido", estado)
     assert "No logré identificar tu pregunta" in respuesta
     assert estado["analitica"]["respuestas_invalidas"] == 1
 
@@ -188,27 +213,27 @@ def test_fallback_fijo_post_resultado_no_inventa_respuesta(resultado_top5: list[
 # --- Comandos de navegación dentro del chat ---------------------------------
 
 
-def test_comando_repetir_no_avanza_el_estado(
+async def test_comando_repetir_no_avanza_el_estado(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
     iniciar_conversacion(estado, preguntas_por_area, preguntas_textos)
     pregunta_antes = estado["pregunta_actual_id"]
 
-    mensaje, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "repetir")
+    mensaje, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "repetir")
 
     assert listo is False
     assert estado["pregunta_actual_id"] == pregunta_antes
     assert estado["total_formuladas"] == 0
 
 
-def test_comando_ver_progreso_no_avanza_el_estado(
+async def test_comando_ver_progreso_no_avanza_el_estado(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
     iniciar_conversacion(estado, preguntas_por_area, preguntas_textos)
 
-    mensaje, listo = procesar_mensaje(
+    mensaje, listo = await procesar_mensaje(
         estado, preguntas_por_area, preguntas_textos, "ver progreso"
     )
 
@@ -217,44 +242,44 @@ def test_comando_ver_progreso_no_avanza_el_estado(
     assert estado["total_formuladas"] == 0
 
 
-def test_comando_anterior_corrige_la_ultima_respuesta(
+async def test_comando_anterior_corrige_la_ultima_respuesta(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
     iniciar_conversacion(estado, preguntas_por_area, preguntas_textos)
     area0 = AREAS[0]
 
-    procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "4")
+    await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "4")
     assert estado["respuestas_por_area"][area0] == [4]
 
-    procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "anterior")
+    await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "anterior")
     assert estado["respuestas_por_area"][area0] == []
     assert estado["total_formuladas"] == 0
     # La pregunta actual vuelve a ser la primera del área.
     assert estado["pregunta_actual_id"] == preguntas_por_area[area0][0]
 
 
-def test_comando_pausar_guarda_estado_sin_perder_avance(
+async def test_comando_pausar_guarda_estado_sin_perder_avance(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
     iniciar_conversacion(estado, preguntas_por_area, preguntas_textos)
-    procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "4")
+    await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "4")
 
-    mensaje, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "pausar")
+    mensaje, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "pausar")
 
     assert listo is False
     assert estado["pausado"] is True
     assert estado["respuestas_por_area"][AREAS[0]] == [4]
 
 
-def test_comando_ayuda_lista_las_opciones_disponibles(
+async def test_comando_ayuda_lista_las_opciones_disponibles(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
     iniciar_conversacion(estado, preguntas_por_area, preguntas_textos)
 
-    mensaje, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "ayuda")
+    mensaje, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "ayuda")
 
     assert listo is False
     assert "repetir" in mensaje.textos[0]
@@ -263,7 +288,7 @@ def test_comando_ayuda_lista_las_opciones_disponibles(
 # --- Límite de reintentos con oferta de cambio a formulario tradicional ------
 
 
-def test_limite_de_reintentos_ofrece_cambiar_a_formulario(
+async def test_limite_de_reintentos_ofrece_cambiar_a_formulario(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
@@ -271,7 +296,7 @@ def test_limite_de_reintentos_ofrece_cambiar_a_formulario(
 
     mensaje = None
     for _ in range(3):
-        mensaje, _ = procesar_mensaje(
+        mensaje, _ = await procesar_mensaje(
             estado, preguntas_por_area, preguntas_textos, "xxzzqq sin sentido"
         )
 

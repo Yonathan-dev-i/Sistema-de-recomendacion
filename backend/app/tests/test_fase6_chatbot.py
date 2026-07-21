@@ -40,7 +40,7 @@ def preguntas_textos() -> dict[int, str]:
     return {p["id"]: p["texto"] for p in cargar_preguntas()}
 
 
-def _correr_conversacion_completa(
+async def _correr_conversacion_completa(
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
     respuestas_por_area_secuencia: dict[str, list[int]],
@@ -57,11 +57,11 @@ def _correr_conversacion_completa(
         for valor in respuestas_por_area_secuencia.get(area, [1]):
             if estado["fase"] != "esperando_respuesta_likert":
                 break
-            procesar_mensaje(estado, preguntas_por_area, preguntas_textos, str(valor))
+            await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, str(valor))
 
     # Confirmación final.
     assert estado["fase"] == "esperando_confirmacion_final"
-    _, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "sí")
+    _, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "sí")
     assert listo is True
     assert estado["fase"] == "post_resultado"
     return estado
@@ -98,7 +98,7 @@ def test_interpretar_si_no(texto: str, esperado: bool | None) -> None:
 # --- validación estricta: no avanza el estado ante respuesta inválida ---------
 
 
-def test_respuesta_invalida_no_avanza_el_estado(
+async def test_respuesta_invalida_no_avanza_el_estado(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
@@ -106,7 +106,7 @@ def test_respuesta_invalida_no_avanza_el_estado(
     pregunta_antes = estado["pregunta_actual_id"]
     fase_antes = estado["fase"]
 
-    mensaje, listo = procesar_mensaje(
+    mensaje, listo = await procesar_mensaje(
         estado, preguntas_por_area, preguntas_textos, "no entiendo"
     )
 
@@ -117,7 +117,7 @@ def test_respuesta_invalida_no_avanza_el_estado(
     assert "1 al 5" in mensaje.textos[0]
 
 
-def test_confirmacion_invalida_no_avanza_a_post_resultado(
+async def test_confirmacion_invalida_no_avanza_a_post_resultado(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
@@ -126,10 +126,10 @@ def test_confirmacion_invalida_no_avanza_a_post_resultado(
         while estado["fase"] == "esperando_respuesta_likert" and len(
             estado["respuestas_por_area"][area]
         ) < 1:
-            procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "1")
+            await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "1")
 
     assert estado["fase"] == "esperando_confirmacion_final"
-    _, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "tal vez")
+    _, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "tal vez")
     assert listo is False
     assert estado["fase"] == "esperando_confirmacion_final"
 
@@ -157,13 +157,13 @@ def test_confirmacion_invalida_no_avanza_a_post_resultado(
         },
     ],
 )
-def test_equivalencia_chatbot_vs_formulario(
+async def test_equivalencia_chatbot_vs_formulario(
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
     secuencias: dict[str, list[int]],
 ) -> None:
     # --- Método 2: chatbot ---
-    estado_chat = _correr_conversacion_completa(
+    estado_chat = await _correr_conversacion_completa(
         preguntas_por_area, preguntas_textos, secuencias
     )
     vector_chatbot = construir_vector_desde_sesion(estado_chat)

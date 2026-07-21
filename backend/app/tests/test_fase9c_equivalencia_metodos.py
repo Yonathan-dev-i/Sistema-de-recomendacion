@@ -114,7 +114,7 @@ def _respuestas_dict_desde_secuencias(
     return respuestas_dict
 
 
-def _ejecutar_chatbot_completo(
+async def _ejecutar_chatbot_completo(
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
     respuestas_dict: dict[int, int],
@@ -138,10 +138,10 @@ def _ejecutar_chatbot_completo(
         assert guardia <= 200, "El chatbot no debería necesitar más de 85 turnos."
         pregunta_id = estado["pregunta_actual_id"]
         valor = respuestas_dict[pregunta_id]
-        procesar_mensaje(estado, preguntas_por_area, preguntas_textos, str(valor))
+        await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, str(valor))
 
     assert estado["fase"] == "esperando_confirmacion_final"
-    _, listo_para_calcular = procesar_mensaje(
+    _, listo_para_calcular = await procesar_mensaje(
         estado, preguntas_por_area, preguntas_textos, "sí"
     )
     assert listo_para_calcular
@@ -220,7 +220,7 @@ assert len(CASOS) >= 10, "La Fase 9c exige cubrir al menos 10 secuencias distint
 
 
 @pytest.mark.parametrize("id_caso, secuencias", CASOS, ids=[c[0] for c in CASOS])
-def test_formulario_y_chatbot_producen_el_mismo_vector_y_top5(
+async def test_formulario_y_chatbot_producen_el_mismo_vector_y_top5(
     id_caso, secuencias, preguntas_por_area, preguntas_textos, motor_recomendacion
 ):
     respuestas_dict = _respuestas_dict_desde_secuencias(preguntas_por_area, secuencias)
@@ -228,7 +228,7 @@ def test_formulario_y_chatbot_producen_el_mismo_vector_y_top5(
     vector_formulario, respuestas_area_formulario, _ = procesar_respuestas_tradicional(
         preguntas_por_area, respuestas_dict
     )
-    vector_chatbot, respuestas_area_chatbot = _ejecutar_chatbot_completo(
+    vector_chatbot, respuestas_area_chatbot = await _ejecutar_chatbot_completo(
         preguntas_por_area, preguntas_textos, respuestas_dict
     )
 

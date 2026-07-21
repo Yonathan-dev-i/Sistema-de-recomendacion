@@ -11,6 +11,7 @@ import enum
 from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, DateTime, Enum, ForeignKey
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -51,7 +52,7 @@ class IntentoTest(Base):
     top5_resultado: Mapped[list | None] = mapped_column(JSON, nullable=True)
     """Snapshot del Top 5 calculado (nombre, afinidad_pct, etc.) al momento del cierre."""
 
-    estado_chat: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    estado_chat: Mapped[dict | None] = mapped_column(MutableDict.as_mutable(JSON), nullable=True)
     """
     Estado de la máquina de estados finita del Método 2 (Fase 6), solo usado
     cuando `metodo == MetodoTest.CHATBOT`. Guarda todo lo necesario para
@@ -60,6 +61,22 @@ class IntentoTest(Base):
     mostradas y el estado (bienvenida / esperando_respuesta_likert /
     esperando_confirmacion_final / post_resultado). Nulo para intentos del
     Método 1 (formulario tradicional).
+
+    Bug corregido (ver docs/fases/fase-10-chatbot-hibrido.md, sección
+    "Bug de persistencia"): con un `JSON` liso, SQLAlchemy compara el valor
+    "antiguo" contra el "nuevo" al hacer `intento.estado_chat = estado`. Como
+    `chatbot_service` muta `estado` EN EL MISMO objeto que ya estaba cargado
+    (no crea uno nuevo), esa comparación los ve como "iguales" (son el mismo
+    objeto) y SQLAlchemy omite la columna del UPDATE — la conversación nunca
+    se guardaba realmente, así que cada mensaje siguiente releía el estado
+    viejo desde la BD y el chatbot repetía la misma pregunta sin avanzar,
+    sin importar la respuesta dada. `MutableDict.as_mutable(...)` hace que
+    cualquier `estado[clave] = valor` a nivel raíz se detecte como cambio
+    automáticamente. Como defensa adicional para las mutaciones anidadas
+    (listas dentro del dict, ej. `estado["historial"].append(...)`, que
+    `MutableDict` NO detecta por sí solo), `app/api/chatbot.py` además llama
+    explícitamente a `flag_modified(intento, "estado_chat")` antes de cada
+    commit.
     """
 
     iniciado_en: Mapped[dt.datetime] = mapped_column(

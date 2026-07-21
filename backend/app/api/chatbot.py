@@ -20,6 +20,7 @@ import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.core.constants import AREAS
 from app.core.database import get_db
@@ -95,6 +96,11 @@ async def _finalizar_y_persistir(
     intento.top5_resultado = resultados_dict
     intento.completado_en = dt.datetime.now(dt.UTC)
     intento.estado_chat = estado
+    # Ver nota en app/models/intento_test.py ("Bug corregido"): sin esto,
+    # las mutaciones anidadas dentro de `estado` (listas, dicts internos) no
+    # siempre se detectan solo con MutableDict, así que se fuerza el marcado
+    # explícito para garantizar que SIEMPRE se persista.
+    flag_modified(intento, "estado_chat")
 
     # `preguntas_usadas` se llenó en el mismo orden (área por área, pregunta
     # por pregunta) que el aplanado de `respuestas_por_area` sobre `AREAS`,
@@ -162,7 +168,7 @@ async def enviar_mensaje(
     estado = intento.estado_chat
 
     try:
-        mensaje, listo_para_calcular = procesar_mensaje(
+        mensaje, listo_para_calcular = await procesar_mensaje(
             estado, preguntas_por_area, preguntas_textos, payload.texto
         )
     except EstadoChatInvalidoError as exc:
@@ -181,6 +187,10 @@ async def enviar_mensaje(
         mensaje.textos = [*mensaje.textos, cierre]
     else:
         intento.estado_chat = estado
+        # Sin esto, este UPDATE podía quedar completamente vacío (ver nota
+        # en app/models/intento_test.py) y la conversación nunca avanzaba
+        # de verdad en la base de datos.
+        flag_modified(intento, "estado_chat")
         await db.commit()
 
     return {

@@ -32,6 +32,20 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
+    # --- Chatbot híbrido (reglas + IA) ---
+    # Feature flag: apagada por defecto. Con esto en False, el chatbot se
+    # comporta EXACTAMENTE igual que antes (100% reglas); no hay ningún
+    # cambio de comportamiento hasta que alguien la active a propósito.
+    chatbot_ia_habilitada: bool = Field(default=False)
+    anthropic_api_key: str = Field(default="")
+    anthropic_model: str = Field(default="claude-sonnet-4-6")
+    ia_timeout_segundos: float = Field(default=6.0)
+    # Umbral mínimo de confianza para aceptar la interpretación de una
+    # respuesta Likert en lenguaje libre hecha por la IA (ver
+    # app/services/ia/interprete_respuestas.py). Por debajo de esto, se
+    # trata igual que si la IA no hubiera reconocido nada (cae a reglas).
+    ia_umbral_confianza: float = Field(default=0.6)
+
 
 @lru_cache
 def get_settings() -> Settings:

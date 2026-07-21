@@ -1,15 +1,29 @@
 """
-Servicio del Método 2 — Chatbot basado en reglas, núcleo conversacional (Fase 6).
+Servicio del Método 2 — Chatbot híbrido: reglas + IA como capa adicional (Fase 6 + Fase 10).
 
-Máquina de estados finita 100% determinista (sin IA generativa, sin LLMs
-externos): el guion, las transiciones y la validación son código explícito.
+Núcleo determinista (máquina de estados finita, sin IA, sin LLMs externos):
+el guion, las transiciones y la validación son código explícito, EXACTAMENTE
+igual que antes. La única adición (Fase 10) es una capa de IA opcional
+(`app/services/ia/`, apagada por defecto vía `chatbot_ia_habilitada`) que
+actúa como fallback SOLO en los puntos donde las reglas ya fallaron:
+interpretar una respuesta Likert ambigua, redactar una FAQ ya encontrada de
+forma más natural, y responder preguntas de seguimiento sobre el resultado
+que no calzan con los patrones fijos. Ver
+`docs/fases/fase-10-chatbot-hibrido.md` para el contrato completo.
 
-Este módulo es **puro**: no importa FastAPI ni toca la base de datos. Recibe
-y devuelve un `dict` de estado de sesión (serializable a JSON, tal como se
-persiste en `IntentoTest.estado_chat` para poder reanudar tras un refresh) y
-`preguntas_por_area` (mismo insumo que ya usa `test_service`), y aplica
-exactamente la misma Lógica Adaptativa de Preguntas de la Fase 3
-(`preguntas_a_formular`), pregunta por pregunta, en tiempo real.
+Este módulo YA NO es 100% síncrono: las funciones que pueden llegar a
+necesitar la capa de IA (`procesar_mensaje`, `_procesar_respuesta_likert`,
+`responder_pregunta_seguimiento`) son `async def`, porque la llamada al LLM
+es I/O de red. Sigue sin tocar la base de datos ni importar FastAPI — el
+router (`app/api/chatbot.py`) sigue siendo el único responsable de
+persistencia.
+
+Este módulo recibe y devuelve un `dict` de estado de sesión (serializable a
+JSON, tal como se persiste en `IntentoTest.estado_chat` para poder reanudar
+tras un refresh) y `preguntas_por_area` (mismo insumo que ya usa
+`test_service`), y aplica exactamente la misma Lógica Adaptativa de
+Preguntas de la Fase 3 (`preguntas_a_formular`), pregunta por pregunta, en
+tiempo real.
 
 Estados de la FSM (`estado.fase`):
 - "bienvenida": estado inicial, aún no se formuló ninguna pregunta.
@@ -23,16 +37,25 @@ Garantía de equivalencia con el Método 1 (formulario): ante la misma
 secuencia de respuestas Likert, área por área, este módulo consume las
 preguntas en el mismo orden y aplica la misma regla de corte que
 `adaptive_flow_service.preguntas_a_formular`, por lo que
-`construir_vector_usuario` produce exactamente el mismo vector.
+`construir_vector_usuario` produce exactamente el mismo vector. La capa de
+IA nunca decide un valor Likert por su cuenta: cuando la usa, solo TRADUCE
+texto ambiguo a un entero 1-5 con un umbral de confianza, y ese entero pasa
+por el mismo camino de reglas que si el usuario hubiera tipeado el dígito.
 """
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, field
 
 from app.core.constants import AREAS
 from app.services.adaptive_flow_service import construir_vector_usuario
 from app.services.faq_service import buscar_intent_faq, normalizar_texto
+from app.services.ia.explicacion_resultado import responder_pregunta_sobre_resultado
+from app.services.ia.faq_asistida import generar_respuesta_faq_asistida
+from app.services.ia.interprete_respuestas import interpretar_respuesta_libre
+
+logger = logging.getLogger("app.chatbot.ia")
 
 LIMITE_REINTENTOS_INVALIDOS = 3
 """Tras N respuestas Likert inválidas seguidas, se ofrece cambiar al formulario."""
@@ -143,6 +166,11 @@ def crear_sesion_inicial() -> dict:
             "intents_disparados": [],
             "respuestas_invalidas": 0,
             "area_abandono": None,
+            # Fase 10 — trazabilidad reglas/IA: cuántas veces, en esta
+            # sesión, una respuesta salió de la capa de IA en vez de una
+            # regla determinista. Útil para logging/depuración; nunca
+            # afecta el flujo del test.
+            "respuestas_ia_usadas": 0,
         },
     }
 
@@ -194,7 +222,7 @@ def iniciar_conversacion(
     return MensajeBot(textos=textos, chips=[1, 2, 3, 4, 5])
 
 
-def procesar_mensaje(
+async def procesar_mensaje(
     estado: dict,
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
@@ -213,7 +241,7 @@ def procesar_mensaje(
     _agregar(estado["historial"], "usuario", texto_usuario)
 
     if estado["fase"] == "esperando_respuesta_likert":
-        return _procesar_respuesta_likert(
+        return await _procesar_respuesta_likert(
             estado, preguntas_por_area, preguntas_textos, texto_usuario
         ), False
 
@@ -254,7 +282,7 @@ def procesar_mensaje(
         return msg, False
 
     if estado["fase"] == "post_resultado":
-        texto = responder_pregunta_seguimiento(texto_usuario, estado)
+        texto = await responder_pregunta_seguimiento(texto_usuario, estado)
         _agregar(estado["historial"], "bot", texto)
         return MensajeBot(textos=[texto]), False
 
@@ -284,12 +312,14 @@ def _armar_comparacion(carreras: list[dict]) -> str:
     )
 
 
-def responder_pregunta_seguimiento(texto_usuario: str, estado: dict) -> str:
+async def responder_pregunta_seguimiento(texto_usuario: str, estado: dict) -> str:
     """
-    Funcionalidad #10 — preguntas de seguimiento tras el resultado. Toda
-    respuesta se arma a partir de una plantilla fija + los datos reales de
-    `estado["ultimo_resultado"]` (el Top 5 ya calculado), nunca de texto
-    generado libremente.
+    Funcionalidad #10 — preguntas de seguimiento tras el resultado. El orden
+    es siempre reglas primero: (1) patrones fijos de "por qué"/"comparar",
+    (2) banco de FAQs, y solo si ninguna de esas dos coincidió, (3) la capa
+    de IA (Fase 10), respondiendo ÚNICAMENTE con los datos reales del Top 5
+    ya calculado. Si la IA está deshabilitada o falla, se usa el mismo
+    mensaje fijo de siempre — nunca se inventa una respuesta.
     """
     resultados = estado.get("ultimo_resultado") or []
     texto_norm = normalizar_texto(texto_usuario)
@@ -319,15 +349,25 @@ def responder_pregunta_seguimiento(texto_usuario: str, estado: dict) -> str:
     if intent is not None:
         intent_id, respuesta_faq = intent
         estado["analitica"]["intents_disparados"].append(intent_id)
-        return respuesta_faq
+        respuesta_final = await generar_respuesta_faq_asistida(texto_usuario, respuesta_faq)
+        if respuesta_final != respuesta_faq:
+            estado["analitica"]["respuestas_ia_usadas"] += 1
+        return respuesta_final
+
+    # Fase 10 — última instancia antes del fallback fijo: la IA responde
+    # apoyándose ÚNICAMENTE en `resultados` (el Top 5 real ya calculado).
+    # Nunca puede mencionar una carrera, % o distancia que no esté ahí.
+    respuesta_ia = await responder_pregunta_sobre_resultado(texto_usuario, resultados)
+    if respuesta_ia is not None:
+        estado["analitica"]["respuestas_ia_usadas"] += 1
+        return respuesta_ia
 
     estado["analitica"]["respuestas_invalidas"] += 1
     # Fallback fijo (funcionalidad #7) — nunca se inventa una respuesta.
     return (
         "No logré identificar tu pregunta. Puedo explicarte por qué te "
         "recomendé una carrera, o comparar dos carreras de tu Top 5. ¿Qué "
-        "te gustaría saber? También puedes escribir 'reiniciar' para "
-        "realizar el test nuevamente."
+        "te gustaría saber?"
     )
 
 
@@ -430,7 +470,7 @@ def _retroceder_pregunta(
     return MensajeBot(textos=[texto, *msg.textos], chips=msg.chips)
 
 
-def _procesar_respuesta_likert(
+async def _procesar_respuesta_likert(
     estado: dict,
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
@@ -445,6 +485,8 @@ def _procesar_respuesta_likert(
             return resultado_comando
 
     valor = interpretar_likert(texto_usuario)
+    origen_ia = False
+
     if valor is None:
         # Antes de tratarla como inválida, ¿es una pregunta abierta del
         # banco de FAQs (funcionalidad #2/#3)? Si coincide, se responde y se
@@ -454,10 +496,35 @@ def _procesar_respuesta_likert(
         if intent is not None:
             intent_id, respuesta_faq = intent
             estado["analitica"]["intents_disparados"].append(intent_id)
-            _agregar(estado["historial"], "bot", respuesta_faq)
+            respuesta_final = await generar_respuesta_faq_asistida(
+                texto_usuario, respuesta_faq
+            )
+            if respuesta_final != respuesta_faq:
+                estado["analitica"]["respuestas_ia_usadas"] += 1
+            _agregar(estado["historial"], "bot", respuesta_final)
             msg = _repetir_pregunta_actual(estado, preguntas_textos)
-            return MensajeBot(textos=[respuesta_faq, *msg.textos], chips=msg.chips)
+            return MensajeBot(textos=[respuesta_final, *msg.textos], chips=msg.chips)
 
+        # Fase 10 — reglas ya fallaron (ni dígito/palabra clave, ni FAQ
+        # conocida): último intento, vía IA, de interpretar una respuesta
+        # ambigua a la pregunta Likert actual. Si la IA está deshabilitada,
+        # falla, o no alcanza el umbral de confianza, `valor` sigue en
+        # `None` y el flujo cae exactamente al mensaje de aclaración de
+        # siempre — ningún comportamiento nuevo visible para el usuario en
+        # ese caso.
+        valor, _confianza = await interpretar_respuesta_libre(
+            texto_usuario, _texto_pregunta(preguntas_textos, estado["pregunta_actual_id"])
+        )
+        if valor is not None:
+            origen_ia = True
+            estado["analitica"]["respuestas_ia_usadas"] += 1
+            logger.info(
+                "Respuesta Likert interpretada por IA (pregunta %s, confianza %.2f)",
+                estado["pregunta_actual_id"],
+                _confianza,
+            )
+
+    if valor is None:
         # Validación estricta: respuesta inválida no avanza el estado.
         estado["intentos_invalidos"] += 1
         estado["analitica"]["respuestas_invalidas"] += 1
@@ -504,6 +571,15 @@ def _procesar_respuesta_likert(
 
     textos: list[str] = []
     chips: list[int] | None = [1, 2, 3, 4, 5]
+
+    if origen_ia:
+        # Transparencia: cuando la IA interpretó una respuesta ambigua, se
+        # lo confirmamos al usuario en vez de avanzar en silencio — así, si
+        # la interpretación fue incorrecta, el usuario lo nota de inmediato
+        # y puede usar el comando "anterior" para corregirla.
+        confirmacion = f"Entendí tu respuesta como un {valor} de 5."
+        textos.append(confirmacion)
+        _agregar(estado["historial"], "bot", confirmacion)
 
     if not area_terminada:
         _preguntar_area(estado, preguntas_por_area, preguntas_textos, transicion=None)
