@@ -44,11 +44,11 @@ def validar_alineacion_areas() -> None:
 
 
 def validar_banco_preguntas() -> None:
-    """Lanza `RuntimeError` si el banco de preguntas no tiene 85 entradas válidas."""
+    """Lanza `RuntimeError` si el banco de preguntas no tiene 34 entradas válidas."""
     preguntas = cargar_preguntas()
-    if len(preguntas) != 85:
+    if len(preguntas) != 34:
         raise RuntimeError(
-            f"Se esperaban 85 preguntas en data/preguntas.json, se encontraron {len(preguntas)}."
+            f"Se esperaban 34 preguntas en data/preguntas.json, se encontraron {len(preguntas)}."
         )
     areas_en_preguntas = {p["area"] for p in preguntas}
     areas_invalidas = areas_en_preguntas - set(AREAS)

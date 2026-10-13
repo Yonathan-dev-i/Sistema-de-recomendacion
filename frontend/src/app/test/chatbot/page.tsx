@@ -35,6 +35,7 @@ export default function ChatbotPage() {
   const [terminado, setTerminado] = useState(false);
   const [resultado, setResultado] = useState<ChatbotResultado | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const finRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,6 +76,34 @@ export default function ChatbotPage() {
         }
       }
 
+      const inicio = await iniciarChat(accessToken);
+      setSesionId(inicio.sesion_id);
+      setMensajes(inicio.mensajes.map((m) => ({ rol: "bot" as const, texto: m.texto })));
+      setChips(inicio.chips);
+      localStorage.setItem(STORAGE_KEY, String(inicio.sesion_id));
+      setEstado("conversando");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "No se pudo conectar con el chatbot.");
+      setEstado("error");
+    }
+  }
+
+  /**
+   * Descarta la sesión actual (aunque el cuestionario no esté terminado) y
+   * arranca una conversación completamente nueva. Se usa desde el botón
+   * "Empezar de nuevo", tras la confirmación del modal.
+   */
+  async function empezarDeNuevo() {
+    setMostrarConfirmacion(false);
+    if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
+    setEstado("cargando");
+    setError(null);
+    setMensajes([]);
+    setChips(null);
+    setTerminado(false);
+    setResultado(null);
+
+    try {
       const inicio = await iniciarChat(accessToken);
       setSesionId(inicio.sesion_id);
       setMensajes(inicio.mensajes.map((m) => ({ rol: "bot" as const, texto: m.texto })));
@@ -158,7 +187,46 @@ export default function ChatbotPage() {
 
   return (
     <main id="contenido" className="flex min-h-screen flex-col">
-      <Breadcrumb items={[{ label: "Test", href: "/test" }, { label: "Chatbot" }]} />
+      <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4">
+        <Breadcrumb items={[{ label: "Test", href: "/test" }, { label: "Chatbot" }]} />
+        <button
+          type="button"
+          onClick={() => setMostrarConfirmacion(true)}
+          className="min-h-[36px] shrink-0 rounded-lg border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          Empezar de nuevo
+        </button>
+      </div>
+
+      {mostrarConfirmacion && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titulo-confirmacion-reinicio"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={() => setMostrarConfirmacion(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="titulo-confirmacion-reinicio" className="text-base font-semibold text-foreground">
+              ¿Empezar de nuevo?
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Se descartará tu conversación actual y el progreso del cuestionario. Esta acción no se puede deshacer.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="ghost" type="button" onClick={() => setMostrarConfirmacion(false)}>
+                Cancelar
+              </Button>
+              <Button type="button" onClick={() => void empezarDeNuevo()}>
+                Sí, empezar de nuevo
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-4">
         <div

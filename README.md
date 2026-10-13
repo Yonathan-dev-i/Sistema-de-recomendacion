@@ -43,7 +43,7 @@ uvicorn app.main:app --reload --port 8000
 Verificar:
 - `GET http://localhost:8000/health` → `{"status": "ok", ...}`
 - `GET http://localhost:8000/areas` → 17 áreas
-- `GET http://localhost:8000/preguntas` → 85 preguntas
+- `GET http://localhost:8000/preguntas` → 34 preguntas
 - `GET http://localhost:8000/carreras` → 37 carreras
 - `GET http://localhost:8000/carrera/1` → detalle con perfil de 17 áreas
 - `POST http://localhost:8000/recomendacion` con body `{"vector_usuario": {"matematica": 5, "...": "..."}}` (17 claves, ver `app/core/constants.py`) → Top 5 con `afinidad_pct`

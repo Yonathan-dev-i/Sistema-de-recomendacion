@@ -9,7 +9,7 @@ El router solo orquesta:
 3. Delega en `recomendacion_service.calcular_recomendacion` (Fase 2) el Top 5,
    usando la matriz de covarianza inversa ya cacheada en `app.state`.
 4. Persiste el intento (`IntentoTest`) y las respuestas efectivamente
-   formuladas (`RespuestaTest`) — nunca las 85, solo las que el algoritmo
+   formuladas (`RespuestaTest`) — nunca las 34, solo las que el algoritmo
    adaptativo realmente consumió.
 
 Fase 9b: si la petición trae un access token válido (`Authorization: Bearer`),

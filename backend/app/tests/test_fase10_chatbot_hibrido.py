@@ -59,8 +59,8 @@ def _bloquear_red(monkeypatch: pytest.MonkeyPatch) -> None:
 def _settings(**overrides) -> Settings:
     base = {
         "chatbot_ia_habilitada": False,
-        "anthropic_api_key": "",
-        "anthropic_model": "claude-sonnet-4-6",
+        "gemini_api_key": "",
+        "gemini_model": "gemini-3.1-flash-lite",
         "ia_timeout_segundos": 6.0,
         "ia_umbral_confianza": 0.6,
     }

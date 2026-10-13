@@ -1,5 +1,5 @@
 """
-Seed idempotente de la base de datos: carga las 17 áreas, las 85 preguntas y
+Seed idempotente de la base de datos: carga las 17 áreas, las 34 preguntas y
 las 37 carreras (con sus 17 puntajes cada una) desde `data/areas.json`,
 `data/preguntas.json` y `data/carreras.csv`.
 
@@ -89,7 +89,7 @@ async def run_seed() -> None:
     # o asyncpg falla con "Event loop is closed" al cerrar la conexión.
     await engine.dispose()
 
-    print("Seed completado: 17 áreas, 85 preguntas, 37 carreras (idempotente).")
+    print("Seed completado: 17 áreas, 34 preguntas, 37 carreras (idempotente).")
 
 
 if __name__ == "__main__":

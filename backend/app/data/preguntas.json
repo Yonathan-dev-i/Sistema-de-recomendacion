@@ -11,417 +11,162 @@
   },
   {
     "id": 3,
-    "area": "desarrollo_personal",
-    "texto": "¿Te consideras una persona capaz de influir positivamente en el estado de ánimo de los demás?"
-  },
-  {
-    "id": 4,
-    "area": "desarrollo_personal",
-    "texto": "¿Te interesa aprender técnicas para mejorar tu autoconocimiento y bienestar emocional?"
-  },
-  {
-    "id": 5,
-    "area": "desarrollo_personal",
-    "texto": "¿Te gusta ayudar a otros a descubrir sus fortalezas y debilidades?"
-  },
-  {
-    "id": 6,
     "area": "ciencias_sociales",
     "texto": "¿Te fascina analizar cómo se organizan las sociedades y cómo cambian con el tiempo?"
   },
   {
-    "id": 7,
+    "id": 4,
     "area": "ciencias_sociales",
     "texto": "¿Te interesa investigar las causas de problemas sociales como la pobreza o la desigualdad?"
   },
   {
-    "id": 8,
-    "area": "ciencias_sociales",
-    "texto": "¿Disfrutas debatir sobre temas políticos, económicos o culturales con otras personas?"
-  },
-  {
-    "id": 9,
-    "area": "ciencias_sociales",
-    "texto": "¿Te gustaría proponer soluciones innovadoras para mejorar la calidad de vida de las comunidades?"
-  },
-  {
-    "id": 10,
-    "area": "ciencias_sociales",
-    "texto": "¿Te apasiona leer sobre historia, sociología o antropología?"
-  },
-  {
-    "id": 11,
+    "id": 5,
     "area": "educacion_fisica",
     "texto": "¿Practicas algún deporte o actividad física con regularidad?"
   },
   {
-    "id": 12,
+    "id": 6,
     "area": "educacion_fisica",
     "texto": "¿Te gusta enseñar ejercicios o rutinas de entrenamiento a otras personas?"
   },
   {
-    "id": 13,
-    "area": "educacion_fisica",
-    "texto": "¿Crees que el ejercicio físico es fundamental para tener una vida saludable?"
-  },
-  {
-    "id": 14,
-    "area": "educacion_fisica",
-    "texto": "¿Disfrutas participar en competencias deportivas o eventos de actividad física?"
-  },
-  {
-    "id": 15,
-    "area": "educacion_fisica",
-    "texto": "¿Te interesaría estudiar los efectos del deporte en la salud y el rendimiento?"
-  },
-  {
-    "id": 16,
+    "id": 7,
     "area": "arte_cultura",
     "texto": "¿Te gusta expresar tus emociones a través del arte (dibujo, pintura, música, danza, etc.)?"
   },
   {
-    "id": 17,
+    "id": 8,
     "area": "arte_cultura",
     "texto": "¿Disfrutas visitar museos, galerías o asistir a eventos culturales?"
   },
   {
-    "id": 18,
-    "area": "arte_cultura",
-    "texto": "¿Te interesa la historia del arte y el patrimonio cultural de tu región?"
-  },
-  {
-    "id": 19,
-    "area": "arte_cultura",
-    "texto": "¿Te consideras una persona creativa y con sensibilidad estética?"
-  },
-  {
-    "id": 20,
-    "area": "arte_cultura",
-    "texto": "¿Te gustaría aprender a tocar un instrumento o perfeccionar una técnica artística?"
-  },
-  {
-    "id": 21,
+    "id": 9,
     "area": "comunicacion",
     "texto": "¿Te consideras hábil para expresar tus ideas de forma clara y convincente?"
   },
   {
-    "id": 22,
+    "id": 10,
     "area": "comunicacion",
     "texto": "¿Disfrutas escribir artículos, cuentos o cualquier tipo de contenido creativo?"
   },
   {
-    "id": 23,
-    "area": "comunicacion",
-    "texto": "¿Te atrae el mundo de los medios de comunicación (radio, TV, prensa, redes sociales)?"
-  },
-  {
-    "id": 24,
-    "area": "comunicacion",
-    "texto": "¿Sabes escuchar activamente y comprendes el punto de vista de los demás?"
-  },
-  {
-    "id": 25,
-    "area": "comunicacion",
-    "texto": "¿Te gustaría trabajar en relaciones públicas, periodismo o marketing digital?"
-  },
-  {
-    "id": 26,
+    "id": 11,
     "area": "castellano_segunda",
     "texto": "¿Disfrutas leer libros, poemas o artículos en castellano?"
   },
   {
-    "id": 27,
+    "id": 12,
     "area": "castellano_segunda",
     "texto": "¿Te sientes seguro al redactar textos formales o informales en castellano?"
   },
   {
-    "id": 28,
-    "area": "castellano_segunda",
-    "texto": "¿Te gusta analizar la gramática y la riqueza del idioma castellano?"
-  },
-  {
-    "id": 29,
-    "area": "castellano_segunda",
-    "texto": "¿Participarías con gusto en talleres de escritura creativa o declamación?"
-  },
-  {
-    "id": 30,
-    "area": "castellano_segunda",
-    "texto": "¿Te interesa la literatura hispanoamericana y sus autores?"
-  },
-  {
-    "id": 31,
+    "id": 13,
     "area": "ingles_extranjero",
     "texto": "¿Te motiva aprender inglés y usarlo para comunicarte con personas de otros países?"
   },
   {
-    "id": 32,
+    "id": 14,
     "area": "ingles_extranjero",
     "texto": "¿Disfrutas ver películas, series o escuchar música en inglés sin subtítulos?"
   },
   {
-    "id": 33,
-    "area": "ingles_extranjero",
-    "texto": "¿Te gusta leer artículos o libros en inglés sobre temas que te interesan?"
-  },
-  {
-    "id": 34,
-    "area": "ingles_extranjero",
-    "texto": "¿Te sentirías capaz de mantener una conversación fluida en inglés?"
-  },
-  {
-    "id": 35,
-    "area": "ingles_extranjero",
-    "texto": "¿Te interesa la cultura de los países angloparlantes?"
-  },
-  {
-    "id": 36,
+    "id": 15,
     "area": "matematica",
     "texto": "¿Disfrutas resolviendo problemas matemáticos o acertijos lógicos?"
   },
   {
-    "id": 37,
+    "id": 16,
     "area": "matematica",
     "texto": "¿Te consideras hábil para el cálculo mental y el razonamiento numérico?"
   },
   {
-    "id": 38,
-    "area": "matematica",
-    "texto": "¿Te gusta explorar patrones y relaciones matemáticas en la naturaleza o en la tecnología?"
-  },
-  {
-    "id": 39,
-    "area": "matematica",
-    "texto": "¿Te sentirías cómodo estudiando materias como álgebra, cálculo o estadística?"
-  },
-  {
-    "id": 40,
-    "area": "matematica",
-    "texto": "¿Crees que las matemáticas son una herramienta fundamental para resolver problemas reales?"
-  },
-  {
-    "id": 41,
+    "id": 17,
     "area": "ciencia_tecnologia",
     "texto": "¿Te apasiona la investigación científica y descubrir cómo funcionan las cosas?"
   },
   {
-    "id": 42,
+    "id": 18,
     "area": "ciencia_tecnologia",
     "texto": "¿Disfrutas experimentar con equipos, herramientas o software para crear soluciones?"
   },
   {
-    "id": 43,
-    "area": "ciencia_tecnologia",
-    "texto": "¿Te interesa la inteligencia artificial, la robótica o la programación?"
-  },
-  {
-    "id": 44,
-    "area": "ciencia_tecnologia",
-    "texto": "¿Te gusta estar al día sobre los últimos avances tecnológicos y científicos?"
-  },
-  {
-    "id": 45,
-    "area": "ciencia_tecnologia",
-    "texto": "¿Te considerarías una persona curiosa y con espíritu innovador?"
-  },
-  {
-    "id": 46,
+    "id": 19,
     "area": "educacion_trabajo",
     "texto": "¿Te interesa la formación profesional y el desarrollo de habilidades laborales?"
   },
   {
-    "id": 47,
+    "id": 20,
     "area": "educacion_trabajo",
     "texto": "¿Te gustaría asesorar o guiar a jóvenes en su inserción al mundo laboral?"
   },
   {
-    "id": 48,
-    "area": "educacion_trabajo",
-    "texto": "¿Disfrutas planificar proyectos y organizar equipos de trabajo?"
-  },
-  {
-    "id": 49,
-    "area": "educacion_trabajo",
-    "texto": "¿Te parece importante la educación continua y la capacitación en el trabajo?"
-  },
-  {
-    "id": 50,
-    "area": "educacion_trabajo",
-    "texto": "¿Te ves como un facilitador del aprendizaje práctico para otros?"
-  },
-  {
-    "id": 51,
+    "id": 21,
     "area": "pensamiento_analitico",
     "texto": "¿Te gusta descomponer problemas complejos en partes más pequeñas para entenderlos mejor?"
   },
   {
-    "id": 52,
+    "id": 22,
     "area": "pensamiento_analitico",
     "texto": "¿Evalúas la información de manera crítica antes de tomar una decisión?"
   },
   {
-    "id": 53,
-    "area": "pensamiento_analitico",
-    "texto": "¿Disfrutas de los juegos de estrategia o de resolver acertijos lógicos?"
-  },
-  {
-    "id": 54,
-    "area": "pensamiento_analitico",
-    "texto": "¿Te consideras capaz de anticipar las consecuencias de tus acciones?"
-  },
-  {
-    "id": 55,
-    "area": "pensamiento_analitico",
-    "texto": "¿Te gusta cuestionar las cosas y buscar explicaciones fundamentadas?"
-  },
-  {
-    "id": 56,
+    "id": 23,
     "area": "alfabetizacion_digital",
     "texto": "¿Te sientes cómodo usando aplicaciones y plataformas digitales?"
   },
   {
-    "id": 57,
+    "id": 24,
     "area": "alfabetizacion_digital",
     "texto": "¿Te interesa aprender a usar la inteligencia artificial para mejorar tu trabajo?"
   },
   {
-    "id": 58,
-    "area": "alfabetizacion_digital",
-    "texto": "¿Disfrutas explorando nuevas herramientas tecnológicas por tu cuenta?"
-  },
-  {
-    "id": 59,
-    "area": "alfabetizacion_digital",
-    "texto": "¿Crees que saber programar o entender datos es importante hoy en día?"
-  },
-  {
-    "id": 60,
-    "area": "alfabetizacion_digital",
-    "texto": "¿Te gustaría especializarte en tecnología o ciencia de datos?"
-  },
-  {
-    "id": 61,
+    "id": 25,
     "area": "adaptabilidad_resiliencia",
     "texto": "¿Te adaptas fácilmente a los cambios inesperados en tu vida?"
   },
   {
-    "id": 62,
+    "id": 26,
     "area": "adaptabilidad_resiliencia",
     "texto": "¿Mantienes la calma y la concentración cuando enfrentas situaciones difíciles?"
   },
   {
-    "id": 63,
-    "area": "adaptabilidad_resiliencia",
-    "texto": "¿Aprendes de los fracasos y los usas como impulso para mejorar?"
-  },
-  {
-    "id": 64,
-    "area": "adaptabilidad_resiliencia",
-    "texto": "¿Te consideras una persona flexible y abierta a nuevas ideas?"
-  },
-  {
-    "id": 65,
-    "area": "adaptabilidad_resiliencia",
-    "texto": "¿Te resulta fácil cambiar de planes cuando las circunstancias lo requieren?"
-  },
-  {
-    "id": 66,
+    "id": 27,
     "area": "comunicacion_efectiva",
     "texto": "¿Expresas tus pensamientos de manera clara y ordenada?"
   },
   {
-    "id": 67,
+    "id": 28,
     "area": "comunicacion_efectiva",
     "texto": "¿Te consideras un buen oyente y captas el mensaje de los demás?"
   },
   {
-    "id": 68,
-    "area": "comunicacion_efectiva",
-    "texto": "¿Sabes dar y recibir críticas constructivas de forma asertiva?"
-  },
-  {
-    "id": 69,
-    "area": "comunicacion_efectiva",
-    "texto": "¿Te gusta participar en debates o presentaciones orales?"
-  },
-  {
-    "id": 70,
-    "area": "comunicacion_efectiva",
-    "texto": "¿Adaptas tu forma de hablar según la persona o el contexto?"
-  },
-  {
-    "id": 71,
+    "id": 29,
     "area": "inteligencia_emocional",
     "texto": "¿Reconoces y entiendes tus propias emociones?"
   },
   {
-    "id": 72,
+    "id": 30,
     "area": "inteligencia_emocional",
     "texto": "¿Eres empático y te pones en el lugar de los demás?"
   },
   {
-    "id": 73,
-    "area": "inteligencia_emocional",
-    "texto": "¿Sabes manejar el estrés y la presión sin perder el control?"
-  },
-  {
-    "id": 74,
-    "area": "inteligencia_emocional",
-    "texto": "¿Resuelves conflictos de manera pacífica y asertiva?"
-  },
-  {
-    "id": 75,
-    "area": "inteligencia_emocional",
-    "texto": "¿Te gusta trabajar en equipo y apoyar a tus compañeros?"
-  },
-  {
-    "id": 76,
+    "id": 31,
     "area": "curiosidad_aprendizaje",
     "texto": "¿Sientes curiosidad por aprender sobre temas nuevos todos los días?"
   },
   {
-    "id": 77,
+    "id": 32,
     "area": "curiosidad_aprendizaje",
     "texto": "¿Buscas activamente oportunidades de aprendizaje (cursos, libros, etc.)?"
   },
   {
-    "id": 78,
-    "area": "curiosidad_aprendizaje",
-    "texto": "¿Te gusta investigar por tu cuenta cuando algo te llama la atención?"
-  },
-  {
-    "id": 79,
-    "area": "curiosidad_aprendizaje",
-    "texto": "¿Crees que la educación no termina nunca y siempre hay algo nuevo por descubrir?"
-  },
-  {
-    "id": 80,
-    "area": "curiosidad_aprendizaje",
-    "texto": "¿Te motiva compartir lo que aprendes con los demás?"
-  },
-  {
-    "id": 81,
+    "id": 33,
     "area": "liderazgo_equipo",
     "texto": "¿Te gusta asumir el rol de líder cuando trabajas en un equipo?"
   },
   {
-    "id": 82,
+    "id": 34,
     "area": "liderazgo_equipo",
     "texto": "¿Disfrutas coordinar tareas y motivar a un grupo para alcanzar un objetivo común?"
-  },
-  {
-    "id": 83,
-    "area": "liderazgo_equipo",
-    "texto": "¿Te sientes cómodo tomando decisiones que afectan a un equipo de trabajo?"
-  },
-  {
-    "id": 84,
-    "area": "liderazgo_equipo",
-    "texto": "¿Te gusta delegar responsabilidades y confiar en las capacidades de los demás?"
-  },
-  {
-    "id": 85,
-    "area": "liderazgo_equipo",
-    "texto": "¿Consideras que un buen líder debe saber escuchar y valorar las ideas de su equipo?"
   }
 ]

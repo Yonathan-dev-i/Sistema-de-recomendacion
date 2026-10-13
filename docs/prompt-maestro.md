@@ -101,7 +101,7 @@ Este archivo se genera **al cerrar la fase**, no al iniciarla, y debe reflejar e
 
 **Objetivo:** tener toda la data del dominio cargada y accesible vía API, con los modelos de base de datos definidos.
 
-- Crear `data/preguntas.json` (85 preguntas, 17 áreas) y `data/areas.json` (17 áreas con orden fijo) tal como se especifica en la sección "Banco de preguntas".
+- Crear `data/preguntas.json` (34 preguntas, 17 áreas) y `data/areas.json` (17 áreas con orden fijo) tal como se especifica en la sección "Banco de preguntas".
 - Crear `data/carreras.csv` (o tabla `carreras`) con las 37 carreras × 17 áreas (el dataset `data_carreras` ya definido).
 - Modelos SQLAlchemy: `Usuario`, `Carrera`, `Area`, `Pregunta`, `IntentoTest`, `RespuestaTest`.
 - Migraciones (Alembic) para crear el esquema en PostgreSQL.
@@ -303,7 +303,7 @@ El sistema permitirá que un estudiante descubra qué carrera profesional de la 
 Debe ofrecer **dos formas diferentes de realizar el test vocacional**, que comparten el mismo banco de preguntas, el mismo cálculo de vector de usuario y el mismo motor de recomendación:
 
 1. Test tradicional mediante formulario (pregunta por pregunta, escala Likert).
-2. Test mediante un chatbot basado en reglas (conversación guiada, mismo banco de hasta 85 preguntas).
+2. Test mediante un chatbot basado en reglas (conversación guiada, mismo banco de hasta 34 preguntas).
 
 Ambos métodos usan además la misma **Lógica Adaptativa de Preguntas por Área**: no siempre se formulan las 5 preguntas de un área, el número real depende de las respuestas del propio usuario (ver sección dedicada más abajo).
 
@@ -323,7 +323,7 @@ Diseñar una Landing Page moderna similar a plataformas como Coursera, Notion o 
 
 ## Sección ¿Cómo funciona?
 Tres tarjetas:
-1. Responder el test (hasta 85 preguntas repartidas en 17 áreas; el sistema recorta preguntas automáticamente según tus respuestas).
+1. Responder el test (hasta 34 preguntas repartidas en 17 áreas; el sistema recorta preguntas automáticamente según tus respuestas).
 2. Analizar intereses mediante la Distancia de Mahalanobis (comparación estadística contra el perfil de 37 carreras).
 3. Obtener las carreras recomendadas (Top 5 con % de afinidad).
 
@@ -331,7 +331,7 @@ Tres tarjetas:
 Dos tarjetas grandes:
 
 **Opción 1 — Test Tradicional**
-Descripción: Responder un cuestionario con escala Likert (hasta 85 preguntas, una por una, con recorte inteligente por área).
+Descripción: Responder un cuestionario con escala Likert (hasta 34 preguntas, una por una, con recorte inteligente por área).
 Botón: Comenzar Test
 
 **Opción 2 — Test con Chatbot**
@@ -352,13 +352,13 @@ Información institucional (UNA Puno).
 
 # Método 1 — Test Tradicional
 
-Utilizar el **banco de hasta 85 preguntas** (sección "Banco de 85 preguntas" más abajo). Cada pregunta pertenece a una de las **17 áreas** definidas. **El número real de preguntas mostradas por área es variable y se decide con la Lógica Adaptativa de Preguntas descrita en la sección siguiente** — no siempre se muestran las 5 preguntas de un área.
+Utilizar el **banco de hasta 34 preguntas** (sección "Banco de 34 preguntas" más abajo). Cada pregunta pertenece a una de las **17 áreas** definidas. **El número real de preguntas mostradas por área es variable y se decide con la Lógica Adaptativa de Preguntas descrita en la sección siguiente** — no siempre se muestran las 2 preguntas de un área.
 
 - Las preguntas se muestran una por una, en el orden de `id` dentro de cada área (la primera pregunta de cada área es siempre la de `id` más bajo de esa área).
 - Escala Likert: 1 = No me gusta nada · 2 = Me gusta poco · 3 = Me gusta moderadamente · 4 = Me gusta bastante · 5 = Me gusta mucho.
 - La interfaz debe mostrar: barra de progreso (estimada/dinámica, ver más abajo), número de pregunta dentro del área actual (ej. "Pregunta 2 de máx. 5 en Matemática"), área evaluada, tiempo estimado restante, botón anterior, botón siguiente.
 - Debe permitir retroceder y modificar una respuesta ya dada. **Si el usuario modifica la respuesta a la primera pregunta de un área que ya había sido "recortada" o "extendida" por la lógica adaptativa, el frontend debe recalcular en vivo cuántas preguntas de esa área corresponde mostrar, y descartar/re-solicitar las respuestas de preguntas que ya no correspondan.**
-- Como el total de preguntas ya no es fijo en 85 (puede ser menor), la barra de progreso debe mostrarse como progreso **por área** ("Área 6 de 17") combinado con una estimación de porcentaje global, no como una fracción fija "X/85".
+- Como el total de preguntas ya no es fijo en 34 (puede ser menor), la barra de progreso debe mostrarse como progreso **por área** ("Área 6 de 17") combinado con una estimación de porcentaje global, no como una fracción fija "X/34".
 
 ## Cálculo del vector de usuario (idéntico en ambos métodos)
 
@@ -387,7 +387,7 @@ Ese vector, junto con el detalle de qué preguntas fueron efectivamente formulad
 
 Implementar un chatbot conversacional **completamente basado en reglas** (máquina de estados finita determinista). **No utilizar IA generativa ni llamadas a modelos de lenguaje externos** para decidir el flujo o generar preguntas: el guion, las transiciones y la validación son 100% código determinista.
 
-El chatbot debe utilizar el **mismo banco de hasta 85 preguntas** que el test tradicional, presentadas como diálogo natural, no como formulario. **El número de preguntas que el chatbot realmente formula por cada área también se decide con la Lógica Adaptativa de Preguntas** (sección siguiente) — el chatbot debe aplicar la misma función de decisión que el formulario tradicional, pregunta por pregunta, en tiempo real dentro de la conversación.
+El chatbot debe utilizar el **mismo banco de hasta 34 preguntas** que el test tradicional, presentadas como diálogo natural, no como formulario. **El número de preguntas que el chatbot realmente formula por cada área también se decide con la Lógica Adaptativa de Preguntas** (sección siguiente) — el chatbot debe aplicar la misma función de decisión que el formulario tradicional, pregunta por pregunta, en tiempo real dentro de la conversación.
 
 ## Ejemplo de flujo (con corte adaptativo dentro de una misma área)
 
@@ -426,7 +426,7 @@ El chatbot debe:
 - Si la respuesta es inválida (texto, número fuera de rango, vacío), volver a formular la pregunta con un mensaje de corrección, sin avanzar el índice.
 - Aplicar la Lógica Adaptativa de Preguntas después de **cada** respuesta dentro de un área, para decidir si formula la siguiente pregunta del área, salta a la siguiente área, o finaliza el test.
 - Mantener en estado de sesión (backend, no solo frontend) el área actual, la pregunta actual dentro del área, y las respuestas ya registradas, para poder reanudar si se refresca la página.
-- Mostrar el progreso por área ("Vamos por el área 6 de 17"), no como fracción fija sobre 85, ya que el total real de preguntas varía según las respuestas del usuario.
+- Mostrar el progreso por área ("Vamos por el área 6 de 17"), no como fracción fija sobre 34, ya que el total real de preguntas varía según las respuestas del usuario.
 - Confirmar cada respuesta registrada con una frase de transición, y anunciar explícitamente cuando se pasa de área (ver ejemplo arriba), para que el usuario entienda por qué a veces hay menos preguntas en una misma área.
 - Variar ligeramente las frases de transición eligiendo aleatoriamente (pero de forma determinista/basada en reglas, ej. una lista rotativa) entre: "Excelente.", "Perfecto.", "Muy bien.", "Continuemos.", "Gracias por responder.", "Pasemos a la siguiente pregunta."
 - Dar mensajes de motivación cada cierto número de áreas completadas (ej. cada 5 áreas).
@@ -502,7 +502,7 @@ Cuando el mensaje del usuario no coincide con ninguna intención conocida, el ch
 - Métricas de abandono por área: en qué área se cierran más sesiones sin terminar.
 
 ### 9. Cierre y transición
-- Resumen final antes de calcular resultados ("Respondiste X de 85 preguntas posibles en Y áreas, ¿confirmas para ver tu recomendación?").
+- Resumen final antes de calcular resultados ("Respondiste X de 34 preguntas posibles en Y áreas, ¿confirmas para ver tu recomendación?").
 - Confirmación explícita antes de enviar a `POST /test/chatbot`, evitando envíos accidentales.
 - Mensaje de despedida personalizado con transición automática a la pantalla de resultados.
 
@@ -800,14 +800,14 @@ def preguntas_a_formular(preguntas_area: list[Pregunta], respuestas_callback) ->
 ## Impacto en el resto del sistema
 
 - **Vector de usuario:** cada componente del vector de 17 dimensiones se calcula como el promedio de las preguntas *realmente formuladas* en esa área (puede ser 1 a 5 valores), no siempre sobre 5. Ver "Cálculo del vector de usuario" en el Método 1.
-- **Persistencia:** la tabla de respuestas (`respuestas_test`) debe guardar, para cada intento de test, qué `pregunta_id` fueron efectivamente mostradas y respondidas (no todas las 85 tendrán una fila).
-- **Contrato de los endpoints `POST /test/tradicional` y `POST /test/chatbot`:** ya no reciben necesariamente 85 respuestas; reciben una lista de `{pregunta_id, respuesta}` de longitud variable (mínimo 17, una por área — el mínimo posible si el usuario responde 1 en la primera pregunta de cada una de las 17 áreas; máximo 85).
+- **Persistencia:** la tabla de respuestas (`respuestas_test`) debe guardar, para cada intento de test, qué `pregunta_id` fueron efectivamente mostradas y respondidas (no todas las 34 tendrán una fila).
+- **Contrato de los endpoints `POST /test/tradicional` y `POST /test/chatbot`:** ya no reciben necesariamente 34 respuestas; reciben una lista de `{pregunta_id, respuesta}` de longitud variable (mínimo 17, una por área — el mínimo posible si el usuario responde 1 en la primera pregunta de cada una de las 17 áreas; máximo 34).
 - **Progreso en la UI (ambos métodos):** dado que el total real de preguntas no se conoce de antemano, el progreso se debe comunicar por área completada (ej. "Área 6 de 17") y opcionalmente con una barra de progreso estimada que se recalcula dinámicamente conforme el sistema conoce el presupuesto real de cada área ya visitada.
 - **Tests unitarios (`pytest`):** deben cubrir exactamente los casos de la tabla de ejemplos anterior, verificando la lista de respuestas devuelta por `preguntas_a_formular` para cada secuencia de entrada simulada.
 
 ---
 
-# Banco de preguntas (85 preguntas, 17 áreas)
+# Banco de preguntas (34 preguntas, 17 áreas)
 
 Usar **exactamente** este banco de preguntas, sin alterar el texto, el orden ni la asignación de área. Debe almacenarse en `data/preguntas.json` (no hardcodeado en el código).
 
@@ -816,153 +816,102 @@ Usar **exactamente** este banco de preguntas, sin alterar el texto, el orden ni 
 
 1. ¿Te gusta motivar a otras personas para que logren sus metas?
 2. ¿Disfrutas participar en actividades de crecimiento personal, como talleres o lecturas de autoayuda?
-3. ¿Te consideras una persona capaz de influir positivamente en el estado de ánimo de los demás?
-4. ¿Te interesa aprender técnicas para mejorar tu autoconocimiento y bienestar emocional?
-5. ¿Te gusta ayudar a otros a descubrir sus fortalezas y debilidades?
 
 
 ### Ciencias Sociales (`ciencias_sociales`)
 
-6. ¿Te fascina analizar cómo se organizan las sociedades y cómo cambian con el tiempo?
-7. ¿Te interesa investigar las causas de problemas sociales como la pobreza o la desigualdad?
-8. ¿Disfrutas debatir sobre temas políticos, económicos o culturales con otras personas?
-9. ¿Te gustaría proponer soluciones innovadoras para mejorar la calidad de vida de las comunidades?
-10. ¿Te apasiona leer sobre historia, sociología o antropología?
+3. ¿Te fascina analizar cómo se organizan las sociedades y cómo cambian con el tiempo?
+4. ¿Te interesa investigar las causas de problemas sociales como la pobreza o la desigualdad?
 
 
 ### Educación Física (`educacion_fisica`)
 
-11. ¿Practicas algún deporte o actividad física con regularidad?
-12. ¿Te gusta enseñar ejercicios o rutinas de entrenamiento a otras personas?
-13. ¿Crees que el ejercicio físico es fundamental para tener una vida saludable?
-14. ¿Disfrutas participar en competencias deportivas o eventos de actividad física?
-15. ¿Te interesaría estudiar los efectos del deporte en la salud y el rendimiento?
+5. ¿Practicas algún deporte o actividad física con regularidad?
+6. ¿Te gusta enseñar ejercicios o rutinas de entrenamiento a otras personas?
 
 
 ### Arte y Cultura (`arte_cultura`)
 
-16. ¿Te gusta expresar tus emociones a través del arte (dibujo, pintura, música, danza, etc.)?
-17. ¿Disfrutas visitar museos, galerías o asistir a eventos culturales?
-18. ¿Te interesa la historia del arte y el patrimonio cultural de tu región?
-19. ¿Te consideras una persona creativa y con sensibilidad estética?
-20. ¿Te gustaría aprender a tocar un instrumento o perfeccionar una técnica artística?
+7. ¿Te gusta expresar tus emociones a través del arte (dibujo, pintura, música, danza, etc.)?
+8. ¿Disfrutas visitar museos, galerías o asistir a eventos culturales?
 
 
 ### Comunicación (`comunicacion`)
 
-21. ¿Te consideras hábil para expresar tus ideas de forma clara y convincente?
-22. ¿Disfrutas escribir artículos, cuentos o cualquier tipo de contenido creativo?
-23. ¿Te atrae el mundo de los medios de comunicación (radio, TV, prensa, redes sociales)?
-24. ¿Sabes escuchar activamente y comprendes el punto de vista de los demás?
-25. ¿Te gustaría trabajar en relaciones públicas, periodismo o marketing digital?
+9. ¿Te consideras hábil para expresar tus ideas de forma clara y convincente?
+10. ¿Disfrutas escribir artículos, cuentos o cualquier tipo de contenido creativo?
 
 
 ### Castellano (segunda lengua) (`castellano_segunda`)
 
-26. ¿Disfrutas leer libros, poemas o artículos en castellano?
-27. ¿Te sientes seguro al redactar textos formales o informales en castellano?
-28. ¿Te gusta analizar la gramática y la riqueza del idioma castellano?
-29. ¿Participarías con gusto en talleres de escritura creativa o declamación?
-30. ¿Te interesa la literatura hispanoamericana y sus autores?
+11. ¿Disfrutas leer libros, poemas o artículos en castellano?
+12. ¿Te sientes seguro al redactar textos formales o informales en castellano?
 
 
 ### Inglés (extranjero) (`ingles_extranjero`)
 
-31. ¿Te motiva aprender inglés y usarlo para comunicarte con personas de otros países?
-32. ¿Disfrutas ver películas, series o escuchar música en inglés sin subtítulos?
-33. ¿Te gusta leer artículos o libros en inglés sobre temas que te interesan?
-34. ¿Te sentirías capaz de mantener una conversación fluida en inglés?
-35. ¿Te interesa la cultura de los países angloparlantes?
+13. ¿Te motiva aprender inglés y usarlo para comunicarte con personas de otros países?
+14. ¿Disfrutas ver películas, series o escuchar música en inglés sin subtítulos?
 
 
 ### Matemática (`matematica`)
 
-36. ¿Disfrutas resolviendo problemas matemáticos o acertijos lógicos?
-37. ¿Te consideras hábil para el cálculo mental y el razonamiento numérico?
-38. ¿Te gusta explorar patrones y relaciones matemáticas en la naturaleza o en la tecnología?
-39. ¿Te sentirías cómodo estudiando materias como álgebra, cálculo o estadística?
-40. ¿Crees que las matemáticas son una herramienta fundamental para resolver problemas reales?
+15. ¿Disfrutas resolviendo problemas matemáticos o acertijos lógicos?
+16. ¿Te consideras hábil para el cálculo mental y el razonamiento numérico?
 
 
 ### Ciencia y Tecnología (`ciencia_tecnologia`)
 
-41. ¿Te apasiona la investigación científica y descubrir cómo funcionan las cosas?
-42. ¿Disfrutas experimentar con equipos, herramientas o software para crear soluciones?
-43. ¿Te interesa la inteligencia artificial, la robótica o la programación?
-44. ¿Te gusta estar al día sobre los últimos avances tecnológicos y científicos?
-45. ¿Te considerarías una persona curiosa y con espíritu innovador?
+17. ¿Te apasiona la investigación científica y descubrir cómo funcionan las cosas?
+18. ¿Disfrutas experimentar con equipos, herramientas o software para crear soluciones?
 
 
 ### Educación para el Trabajo (`educacion_trabajo`)
 
-46. ¿Te interesa la formación profesional y el desarrollo de habilidades laborales?
-47. ¿Te gustaría asesorar o guiar a jóvenes en su inserción al mundo laboral?
-48. ¿Disfrutas planificar proyectos y organizar equipos de trabajo?
-49. ¿Te parece importante la educación continua y la capacitación en el trabajo?
-50. ¿Te ves como un facilitador del aprendizaje práctico para otros?
+19. ¿Te interesa la formación profesional y el desarrollo de habilidades laborales?
+20. ¿Te gustaría asesorar o guiar a jóvenes en su inserción al mundo laboral?
 
 
 ### Pensamiento Analítico y Crítico (`pensamiento_analitico`)
 
-51. ¿Te gusta descomponer problemas complejos en partes más pequeñas para entenderlos mejor?
-52. ¿Evalúas la información de manera crítica antes de tomar una decisión?
-53. ¿Disfrutas de los juegos de estrategia o de resolver acertijos lógicos?
-54. ¿Te consideras capaz de anticipar las consecuencias de tus acciones?
-55. ¿Te gusta cuestionar las cosas y buscar explicaciones fundamentadas?
+21. ¿Te gusta descomponer problemas complejos en partes más pequeñas para entenderlos mejor?
+22. ¿Evalúas la información de manera crítica antes de tomar una decisión?
 
 
 ### Alfabetización Digital e IA (`alfabetizacion_digital`)
 
-56. ¿Te sientes cómodo usando aplicaciones y plataformas digitales?
-57. ¿Te interesa aprender a usar la inteligencia artificial para mejorar tu trabajo?
-58. ¿Disfrutas explorando nuevas herramientas tecnológicas por tu cuenta?
-59. ¿Crees que saber programar o entender datos es importante hoy en día?
-60. ¿Te gustaría especializarte en tecnología o ciencia de datos?
+23. ¿Te sientes cómodo usando aplicaciones y plataformas digitales?
+24. ¿Te interesa aprender a usar la inteligencia artificial para mejorar tu trabajo?
 
 
 ### Adaptabilidad y Resiliencia (`adaptabilidad_resiliencia`)
 
-61. ¿Te adaptas fácilmente a los cambios inesperados en tu vida?
-62. ¿Mantienes la calma y la concentración cuando enfrentas situaciones difíciles?
-63. ¿Aprendes de los fracasos y los usas como impulso para mejorar?
-64. ¿Te consideras una persona flexible y abierta a nuevas ideas?
-65. ¿Te resulta fácil cambiar de planes cuando las circunstancias lo requieren?
+25. ¿Te adaptas fácilmente a los cambios inesperados en tu vida?
+26. ¿Mantienes la calma y la concentración cuando enfrentas situaciones difíciles?
 
 
 ### Comunicación Efectiva (`comunicacion_efectiva`)
 
-66. ¿Expresas tus pensamientos de manera clara y ordenada?
-67. ¿Te consideras un buen oyente y captas el mensaje de los demás?
-68. ¿Sabes dar y recibir críticas constructivas de forma asertiva?
-69. ¿Te gusta participar en debates o presentaciones orales?
-70. ¿Adaptas tu forma de hablar según la persona o el contexto?
+27. ¿Expresas tus pensamientos de manera clara y ordenada?
+28. ¿Te consideras un buen oyente y captas el mensaje de los demás?
 
 
 ### Inteligencia Emocional e Interpersonal (`inteligencia_emocional`)
 
-71. ¿Reconoces y entiendes tus propias emociones?
-72. ¿Eres empático y te pones en el lugar de los demás?
-73. ¿Sabes manejar el estrés y la presión sin perder el control?
-74. ¿Resuelves conflictos de manera pacífica y asertiva?
-75. ¿Te gusta trabajar en equipo y apoyar a tus compañeros?
+29. ¿Reconoces y entiendes tus propias emociones?
+30. ¿Eres empático y te pones en el lugar de los demás?
 
 
 ### Curiosidad y Aprendizaje Continuo (`curiosidad_aprendizaje`)
 
-76. ¿Sientes curiosidad por aprender sobre temas nuevos todos los días?
-77. ¿Buscas activamente oportunidades de aprendizaje (cursos, libros, etc.)?
-78. ¿Te gusta investigar por tu cuenta cuando algo te llama la atención?
-79. ¿Crees que la educación no termina nunca y siempre hay algo nuevo por descubrir?
-80. ¿Te motiva compartir lo que aprendes con los demás?
+31. ¿Sientes curiosidad por aprender sobre temas nuevos todos los días?
+32. ¿Buscas activamente oportunidades de aprendizaje (cursos, libros, etc.)?
 
 
 ### Liderazgo y Trabajo en Equipo (`liderazgo_equipo`)
 
-81. ¿Te gusta asumir el rol de líder cuando trabajas en un equipo?
-82. ¿Disfrutas coordinar tareas y motivar a un grupo para alcanzar un objetivo común?
-83. ¿Te sientes cómodo tomando decisiones que afectan a un equipo de trabajo?
-84. ¿Te gusta delegar responsabilidades y confiar en las capacidades de los demás?
-85. ¿Consideras que un buen líder debe saber escuchar y valorar las ideas de su equipo?
+33. ¿Te gusta asumir el rol de líder cuando trabajas en un equipo?
+34. ¿Disfrutas coordinar tareas y motivar a un grupo para alcanzar un objetivo común?
 
 
 ## `data/areas.json` — las 17 áreas (mantener este orden exacto; el orden define el orden de las dimensiones del vector)
@@ -996,7 +945,7 @@ Usar **exactamente** este banco de preguntas, sin alterar el texto, el orden ni 
 {"id": 1, "area": "desarrollo_personal", "texto": "¿Te gusta motivar a otras personas para que logren sus metas?"}
 ```
 
-Generar las 85 entradas exactamente como se listaron arriba, en el mismo orden de `id` (1 a 85).
+Generar las 34 entradas exactamente como se listaron arriba, en el mismo orden de `id` (1 a 34).
 
 ---
 
@@ -1221,9 +1170,9 @@ backend/
 
 Endpoints:
 
-- `GET /preguntas` — devuelve el banco completo de hasta 85 preguntas (el frontend/chatbot decide cuáles formular realmente aplicando la Lógica Adaptativa de Preguntas)
+- `GET /preguntas` — devuelve el banco completo de hasta 34 preguntas (el frontend/chatbot decide cuáles formular realmente aplicando la Lógica Adaptativa de Preguntas)
 - `GET /areas` — devuelve las 17 áreas con sus labels
-- `POST /test/tradicional` — recibe respuestas 1–85, calcula vector, devuelve `test_id`
+- `POST /test/tradicional` — recibe respuestas 1–34, calcula vector, devuelve `test_id`
 - `POST /test/chatbot` — mismo contrato de entrada/salida que el anterior, alimentado por el flujo conversacional
 - `POST /recomendacion` — recibe `vector_usuario` o `test_id`, ejecuta Mahalanobis, devuelve Top 5
 - `GET /carreras` — lista las 37 carreras con su perfil
@@ -1365,4 +1314,4 @@ Esta sección define, pantalla por pantalla, componente por componente, todo lo 
 
 # Objetivo final
 
-Generar un sistema completo, modular, escalable y profesional que permita a un estudiante realizar el test vocacional mediante un formulario tradicional o mediante un chatbot basado en reglas. Ambos métodos deben utilizar **exactamente** el banco de hasta 85 preguntas y la matriz de 37 carreras × 17 áreas especificados en este documento, aplicar la **misma Lógica Adaptativa de Preguntas por Área** (recortando o manteniendo el número de preguntas de cada área según la primera respuesta y las respuestas subsecuentes, nunca extendiéndolo por encima de lo que habilitó la primera respuesta), y producir las mismas recomendaciones mediante el algoritmo de **Distancia de Mahalanobis** (con regularización/pseudo-inversa como fallback, normalización a porcentaje de afinidad, y explicación por reglas), ofreciendo una experiencia intuitiva, moderna y fácil de usar.
+Generar un sistema completo, modular, escalable y profesional que permita a un estudiante realizar el test vocacional mediante un formulario tradicional o mediante un chatbot basado en reglas. Ambos métodos deben utilizar **exactamente** el banco de hasta 34 preguntas y la matriz de 37 carreras × 17 áreas especificados en este documento, aplicar la **misma Lógica Adaptativa de Preguntas por Área** (recortando o manteniendo el número de preguntas de cada área según la primera respuesta y las respuestas subsecuentes, nunca extendiéndolo por encima de lo que habilitó la primera respuesta), y producir las mismas recomendaciones mediante el algoritmo de **Distancia de Mahalanobis** (con regularización/pseudo-inversa como fallback, normalización a porcentaje de afinidad, y explicación por reglas), ofreciendo una experiencia intuitiva, moderna y fácil de usar.

@@ -36,7 +36,7 @@ def cargar_areas() -> list[AreaDict]:
 
 
 def cargar_preguntas() -> list[PreguntaDict]:
-    """Carga las 85 preguntas desde `data/preguntas.json`, en orden de `id`."""
+    """Carga las 34 preguntas desde `data/preguntas.json`, en orden de `id`."""
     with open(DATA_DIR / "preguntas.json", encoding="utf-8") as f:
         preguntas: list[PreguntaDict] = json.load(f)
     return sorted(preguntas, key=lambda p: p["id"])

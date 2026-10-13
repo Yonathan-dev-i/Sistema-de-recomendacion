@@ -40,7 +40,7 @@ def preguntas_textos() -> dict[int, str]:
     return {p["id"]: p["texto"] for p in cargar_preguntas()}
 
 
-async def _correr_conversacion_completa(
+def _correr_conversacion_completa(
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
     respuestas_por_area_secuencia: dict[str, list[int]],
@@ -53,15 +53,22 @@ async def _correr_conversacion_completa(
     estado = crear_sesion_inicial()
     iniciar_conversacion(estado, preguntas_por_area, preguntas_textos)
 
-    for area in AREAS:
+    for area_idx, area in enumerate(AREAS):
         for valor in respuestas_por_area_secuencia.get(area, [1]):
-            if estado["fase"] != "esperando_respuesta_likert":
+            # Se corta tanto si el test terminó (confirmación final) como si
+            # ya se avanzó a la siguiente área (esta ya recibió todas las
+            # respuestas que el banco real tiene para ella) — sin este
+            # segundo chequeo, los valores sobrantes de una secuencia más
+            # larga que el banco del área (ej. [5, 5, 5, 5, 5] con un banco
+            # de solo 2 preguntas/área) se filtrarían como respuestas de la
+            # primera pregunta del área siguiente.
+            if estado["fase"] != "esperando_respuesta_likert" or estado["area_idx"] != area_idx:
                 break
-            await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, str(valor))
+            procesar_mensaje(estado, preguntas_por_area, preguntas_textos, str(valor))
 
     # Confirmación final.
     assert estado["fase"] == "esperando_confirmacion_final"
-    _, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "sí")
+    _, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "sí")
     assert listo is True
     assert estado["fase"] == "post_resultado"
     return estado
@@ -98,7 +105,7 @@ def test_interpretar_si_no(texto: str, esperado: bool | None) -> None:
 # --- validación estricta: no avanza el estado ante respuesta inválida ---------
 
 
-async def test_respuesta_invalida_no_avanza_el_estado(
+def test_respuesta_invalida_no_avanza_el_estado(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
@@ -106,7 +113,7 @@ async def test_respuesta_invalida_no_avanza_el_estado(
     pregunta_antes = estado["pregunta_actual_id"]
     fase_antes = estado["fase"]
 
-    mensaje, listo = await procesar_mensaje(
+    mensaje, listo = procesar_mensaje(
         estado, preguntas_por_area, preguntas_textos, "no entiendo"
     )
 
@@ -117,7 +124,7 @@ async def test_respuesta_invalida_no_avanza_el_estado(
     assert "1 al 5" in mensaje.textos[0]
 
 
-async def test_confirmacion_invalida_no_avanza_a_post_resultado(
+def test_confirmacion_invalida_no_avanza_a_post_resultado(
     preguntas_por_area: dict[str, list[int]], preguntas_textos: dict[int, str]
 ) -> None:
     estado = crear_sesion_inicial()
@@ -126,10 +133,10 @@ async def test_confirmacion_invalida_no_avanza_a_post_resultado(
         while estado["fase"] == "esperando_respuesta_likert" and len(
             estado["respuestas_por_area"][area]
         ) < 1:
-            await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "1")
+            procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "1")
 
     assert estado["fase"] == "esperando_confirmacion_final"
-    _, listo = await procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "tal vez")
+    _, listo = procesar_mensaje(estado, preguntas_por_area, preguntas_textos, "tal vez")
     assert listo is False
     assert estado["fase"] == "esperando_confirmacion_final"
 
@@ -142,7 +149,10 @@ async def test_confirmacion_invalida_no_avanza_a_post_resultado(
     [
         # Presupuesto mínimo: 1 en la primera pregunta de todas las áreas.
         {area: [1] for area in AREAS},
-        # Presupuesto máximo: 5 constante en todas las preguntas (85 en total).
+        # Presupuesto máximo: 5 constante en todas las preguntas (el banco
+        # solo tiene 2 por área, así que el helper corta ahí; el 5 extra
+        # queda deliberadamente en la secuencia para probar que no se filtra
+        # a la siguiente área).
         {area: [5, 5, 5, 5, 5] for area in AREAS},
         # Caso mixto: recorte a mitad de camino en varias áreas.
         {
@@ -157,13 +167,13 @@ async def test_confirmacion_invalida_no_avanza_a_post_resultado(
         },
     ],
 )
-async def test_equivalencia_chatbot_vs_formulario(
+def test_equivalencia_chatbot_vs_formulario(
     preguntas_por_area: dict[str, list[int]],
     preguntas_textos: dict[int, str],
     secuencias: dict[str, list[int]],
 ) -> None:
     # --- Método 2: chatbot ---
-    estado_chat = await _correr_conversacion_completa(
+    estado_chat = _correr_conversacion_completa(
         preguntas_por_area, preguntas_textos, secuencias
     )
     vector_chatbot = construir_vector_desde_sesion(estado_chat)

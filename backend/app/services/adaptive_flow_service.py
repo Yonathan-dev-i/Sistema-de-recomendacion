@@ -8,7 +8,12 @@ su cuenta — ambos llaman a `preguntas_a_formular` desde aquí.
 
 Idea general (ver especificación completa en el prompt maestro):
 - La primera respuesta de un área define el "presupuesto" máximo de preguntas
-  de esa área (1 a 5).
+  de esa área (1 a 5 en la escala Likert), pero el presupuesto real nunca
+  puede superar la cantidad de preguntas que el área realmente tiene
+  (`len(preguntas_area)`, hoy 2 tras la reducción del banco) — de ahí el
+  `min(limite_area, len(preguntas_area))` en el bucle de abajo. La función no
+  asume ningún tamaño fijo de banco: sirve igual si un área tuviera 2, 3 o 5
+  preguntas.
 - Las respuestas siguientes pueden **recortar** ese presupuesto (si alguna es
   menor a 3, el área se corta ahí mismo), pero **nunca lo extienden** por
   encima de lo que habilitó la primera respuesta, aunque una respuesta
@@ -25,7 +30,8 @@ def preguntas_a_formular(
     respuestas_callback: Callable[[Pregunta], int],
 ) -> list[int]:
     """
-    Recorre hasta las 5 preguntas de un área, aplicando la Lógica Adaptativa.
+    Recorre hasta las preguntas disponibles de un área (según `preguntas_area`),
+    aplicando la Lógica Adaptativa.
 
     Args:
         preguntas_area: las (hasta 5) preguntas del área, ordenadas por id ascendente.
@@ -47,7 +53,7 @@ def preguntas_a_formular(
     respuestas.append(r1)
 
     # 2) La primera respuesta define el "presupuesto" máximo de preguntas del área.
-    limite_area = r1  # r1 está en el rango 1-5, igual que el número de preguntas del área
+    limite_area = r1  # r1 está en el rango 1-5; se acota al tamaño real del área abajo.
 
     # 3) Si el presupuesto es 1 (no le gusta nada), no se formulan más preguntas de esta área.
     if limite_area <= 1:

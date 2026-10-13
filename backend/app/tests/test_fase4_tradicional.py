@@ -49,48 +49,50 @@ def test_respuesta_1_en_todas_las_areas_produce_17_respuestas_totales(preguntas_
     assert all(len(r) == 1 for r in respuestas_por_area.values())
 
 
-def test_respuesta_5_constante_formula_las_5_preguntas_de_cada_area(preguntas_por_area):
+def test_respuesta_5_constante_formula_las_2_preguntas_de_cada_area(preguntas_por_area):
     respuestas_dict = {
         pid: 5 for ids in preguntas_por_area.values() for pid in ids
     }
     vector, respuestas_por_area, preguntas_usadas = procesar_respuestas_tradicional(
         preguntas_por_area, respuestas_dict
     )
-    assert len(preguntas_usadas) == 85
-    assert all(len(r) == 5 for r in respuestas_por_area.values())
+    assert len(preguntas_usadas) == 34
+    assert all(len(r) == 2 for r in respuestas_por_area.values())
     assert all(v == 5.0 for v in vector.values())
 
 
 def test_caso_mixto_recorta_solo_las_areas_con_respuesta_baja(preguntas_por_area):
     """
-    Área 'matematica': [3, 5, 4] -> se corta en 3 (presupuesto de la 1ra
-    respuesta), aunque la 2da sea mayor. El resto de áreas: solo 1 respuesta
-    (presupuesto 1), como en el caso mínimo.
+    Área 'matematica': [3, 5] -> con solo 2 preguntas en el banco, una primera
+    respuesta de 3 (que en la escala Likert habilitaría hasta 3) igual se
+    acota a las 2 preguntas reales del área, así que se formulan ambas. El
+    resto de áreas: solo 1 respuesta (presupuesto 1), como en el caso mínimo.
     """
     respuestas_dict = _respuesta_minima_para_todas_las_areas(preguntas_por_area, valor=1)
     ids_matematica = preguntas_por_area["matematica"]
     respuestas_dict[ids_matematica[0]] = 3
     respuestas_dict[ids_matematica[1]] = 5
-    respuestas_dict[ids_matematica[2]] = 4
 
     vector, respuestas_por_area, preguntas_usadas = procesar_respuestas_tradicional(
         preguntas_por_area, respuestas_dict
     )
-    assert respuestas_por_area["matematica"] == [3, 5, 4]
-    assert vector["matematica"] == pytest.approx(4.0)  # promedio de [3, 5, 4]
-    # 16 áreas con 1 pregunta + matemática con 3 = 19 preguntas usadas
-    assert len(preguntas_usadas) == 16 + 3
+    assert respuestas_por_area["matematica"] == [3, 5]
+    assert vector["matematica"] == pytest.approx(4.0)  # promedio de [3, 5]
+    # 16 áreas con 1 pregunta + matemática con 2 = 18 preguntas usadas
+    assert len(preguntas_usadas) == 16 + 2
 
 
 def test_falta_una_respuesta_que_si_correspondia_lanza_error(preguntas_por_area):
     """
-    'matematica': la primera respuesta es 3 (presupuesto de 3 preguntas), pero
-    no se envía la respuesta a la 2da pregunta del área, que sí correspondía
-    formular. Debe rechazarse en vez de completar el vector con datos parciales.
+    'matematica': la primera respuesta es 3 (que en la escala Likert
+    habilitaría presupuesto de 3, acotado a las 2 preguntas reales del área),
+    pero no se envía la respuesta a la 2da pregunta del área, que sí
+    correspondía formular. Debe rechazarse en vez de completar el vector con
+    datos parciales.
     """
     respuestas_dict = _respuesta_minima_para_todas_las_areas(preguntas_por_area, valor=1)
     ids_matematica = preguntas_por_area["matematica"]
-    respuestas_dict[ids_matematica[0]] = 3  # presupuesto 3, pero falta la 2da y 3ra
+    respuestas_dict[ids_matematica[0]] = 3  # falta la 2da respuesta
 
     with pytest.raises(RespuestasInvalidasError):
         procesar_respuestas_tradicional(preguntas_por_area, respuestas_dict)

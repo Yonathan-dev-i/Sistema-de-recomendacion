@@ -2,7 +2,7 @@
 
 ## 1. Objetivo de la fase
 
-Tener el dominio de datos completo en PostgreSQL: las 17 áreas, las 85 preguntas
+Tener el dominio de datos completo en PostgreSQL: las 17 áreas, las 34 preguntas
 del banco vocacional y las 37 carreras (con su perfil de 17 puntajes cada una),
 accesibles a través de endpoints de solo lectura, con migraciones versionadas y
 un seed reproducible.
@@ -12,8 +12,9 @@ un seed reproducible.
 - **Datasets fuente** (usados solo para el seed, no leídos en tiempo de request):
   - `backend/app/data/areas.json`: 17 áreas, en el orden fijo que define el
     vector vocacional.
-  - `backend/app/data/preguntas.json`: 85 preguntas (5 por área × 17 áreas),
-    con `id` 1-85 sin huecos.
+  - `backend/app/data/preguntas.json`: 34 preguntas (2 por área × 17 áreas,
+    reducido desde las 5 por área originales a pedido del equipo — ver nota
+    en la sección 6), con `id` 1-34 sin huecos.
   - `backend/app/data/carreras.csv`: 37 carreras × 17 columnas de puntaje
     (escala 1-5), transcritas directamente del prompt maestro.
   - `backend/app/data/loaders.py`: funciones puras que leen estos 3 archivos.
@@ -23,7 +24,7 @@ un seed reproducible.
 - **Validación de arranque:** `backend/app/core/startup_checks.py` verifica, en
   el evento `lifespan` de FastAPI, que `AREAS`, `areas.json` y las columnas de
   `carreras.csv` coincidan exactamente (mismo orden, mismo contenido, 17
-  elementos), y que el banco de preguntas tenga 85 entradas válidas. Si algo no
+  elementos), y que el banco de preguntas tenga 34 entradas válidas. Si algo no
   coincide, la aplicación **no arranca** y lanza un `RuntimeError` explícito.
 - **Modelos SQLAlchemy 2.0** (`backend/app/models/`):
   - `Usuario`, `Area`, `Pregunta`, `Carrera` + `CarreraPuntaje` (tabla de unión
@@ -41,13 +42,13 @@ un seed reproducible.
 - **Endpoints de solo lectura** (`backend/app/api/dominio.py`), montados junto
   al router de salud existente:
   - `GET /areas` → las 17 áreas ordenadas.
-  - `GET /preguntas` → las 85 preguntas ordenadas por id.
+  - `GET /preguntas` → las 34 preguntas ordenadas por id.
   - `GET /carreras` → listado resumido de las 37 carreras.
   - `GET /carrera/{id}` → detalle de una carrera + su perfil de 17 áreas
     (404 si no existe).
 - **Tests** (`backend/app/tests/test_fase1_datos.py`): 8 tests nuevos que
-  verifican el tamaño y alineación de `AREAS`, el banco de preguntas (85
-  entradas, ids 1-85 sin huecos, 5 preguntas por área) y que la validación de
+  verifican el tamaño y alineación de `AREAS`, el banco de preguntas (34
+  entradas, ids 1-34 sin huecos, 2 preguntas por área) y que la validación de
   arranque falla explícitamente ante datos corruptos (test con `monkeypatch`).
 
 ## 3. Decisiones técnicas relevantes
@@ -62,7 +63,7 @@ un seed reproducible.
   un intento), no algo que se necesite filtrar por SQL — JSON es más simple y
   evita una tabla adicional para 17 valores que solo se leen como bloque.
 - **`Pregunta.id` no es autoincremental "libre":** se usan explícitamente los
-  ids 1-85 del `preguntas.json` original (`db.add(Pregunta(id=..., ...))`), para
+  ids 1-34 del `preguntas.json` original (`db.add(Pregunta(id=..., ...))`), para
   que el id de una pregunta sea estable entre entornos y coincida con el usado
   en el frontend/chatbot de fases posteriores.
 - **`AREAS` como single source of truth del orden del vector:** ni `areas.json`
@@ -87,9 +88,9 @@ verificar contra una base de datos real, no simulada.
 | Criterio | Método de verificación | Resultado |
 |---|---|---|
 | Migraciones aplican sin error | `alembic revision --autogenerate` + `alembic upgrade head` | ✅ 7 tablas creadas (`areas`, `preguntas`, `carreras`, `carrera_puntajes`, `intentos_test`, `respuestas_test`, `usuarios`) |
-| Seed carga los 3 datasets correctamente | `python -m app.scripts.seed_data` + `SELECT count(*)` en cada tabla | ✅ 17 áreas, 85 preguntas, 37 carreras, 629 puntajes (37×17) |
+| Seed carga los 3 datasets correctamente | `python -m app.scripts.seed_data` + `SELECT count(*)` en cada tabla | ✅ 17 áreas, 34 preguntas, 37 carreras, 629 puntajes (37×17) |
 | Seed es idempotente | Seed ejecutado dos veces seguidas | ✅ Mismos conteos tras la 2ª corrida, sin duplicados ni errores |
-| Los 4 endpoints responden con datos reales | Backend levantado + `curl` a cada endpoint | ✅ `/areas`→17, `/preguntas`→85, `/carreras`→37, `/carrera/1`→200, `/carrera/999`→404 |
+| Los 4 endpoints responden con datos reales | Backend levantado + `curl` a cada endpoint | ✅ `/areas`→17, `/preguntas`→34, `/carreras`→37, `/carrera/1`→200, `/carrera/999`→404 |
 | Linters pasan sin errores | `ruff check app/` | ✅ "All checks passed!" (tras corregir 6 hallazgos: forward-refs sin `TYPE_CHECKING`, `enum.Enum`→`enum.StrEnum`, `datetime.timezone.utc`→`datetime.UTC`, orden de imports) |
 | Tests pasan | `pytest app/tests/ -v` | ✅ 10/10 (2 de Fase 0 + 8 nuevos de Fase 1), sin warnings propios |
 
@@ -125,6 +126,16 @@ verificar contra una base de datos real, no simulada.
   de datos requirió reiniciar el servicio (`service postgresql start`) antes de
   cada ronda de pruebas. Esto es una particularidad del entorno de desarrollo
   de esta sesión, no del proyecto en sí.
+- **Reducción posterior del banco de preguntas (85 → 34).** A pedido del
+  equipo, después del cierre original de esta fase se redujo el banco de 5 a
+  2 preguntas por área (17 × 2 = 34 en total), conservando las 2 primeras
+  preguntas de cada área en su orden original. La Lógica Adaptativa de
+  Preguntas (Fase 3) no necesitó cambios de código porque ya acotaba el
+  presupuesto al tamaño real del área (`min(limite_area, len(preguntas_area))`);
+  solo se actualizaron `data/preguntas.json`, la validación de arranque, los
+  límites de `TestTradicionalIn` y los tests que asumían 85/5 como valores
+  fijos. Detalle completo en el historial de esta conversación de
+  construcción del proyecto.
 
 ## 7. Estado final de la fase
 

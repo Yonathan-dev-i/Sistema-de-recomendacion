@@ -37,7 +37,7 @@ ante exactamente la misma secuencia de respuestas del usuario.
   7. `presupuesto_2_nunca_se_extiende_2_4` — `[2, 4]`
   8. `multiples_areas_con_recorte_simultaneo` — 4 áreas con distintos patrones de recorte/extensión a la vez.
   9. `todas_las_areas_en_minimo` — las 17 áreas en `[1]` (caso extremo mínimo, 17 preguntas totales).
-  10. `todas_las_areas_al_maximo` — las 17 áreas en `[5,5,5,5,5]` (caso extremo máximo, 85 preguntas totales).
+  10. `todas_las_areas_al_maximo` — las 17 áreas en `[5,5,5,5,5]` (caso extremo máximo; el banco solo tiene 2 preguntas/área, así que en la práctica son 34 preguntas totales, el resto de la secuencia se ignora).
   11. `perfil_mixto_realista_variado_por_area` — las 17 áreas con secuencias distintas (mezcla de recorte y extensión), simulando un usuario real.
 
   Las 7 primeras replican exactamente los 7 casos de la tabla de validación

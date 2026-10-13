@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     # comporta EXACTAMENTE igual que antes (100% reglas); no hay ningún
     # cambio de comportamiento hasta que alguien la active a propósito.
     chatbot_ia_habilitada: bool = Field(default=False)
-    anthropic_api_key: str = Field(default="")
-    anthropic_model: str = Field(default="claude-sonnet-4-6")
+    gemini_api_key: str = Field(default="")
+    gemini_model: str = Field(default="gemini-3.1-flash-lite")
     ia_timeout_segundos: float = Field(default=6.0)
     # Umbral mínimo de confianza para aceptar la interpretación de una
     # respuesta Likert en lenguaje libre hecha por la IA (ver

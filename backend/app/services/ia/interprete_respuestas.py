@@ -30,8 +30,15 @@ logger = logging.getLogger("app.chatbot.ia")
 
 _SYSTEM_PROMPT = (
     "Clasificas una respuesta de estudiante a una pregunta de test "
-    "vocacional en una escala Likert de 1 a 5, donde 1 = No me gusta nada "
-    "y 5 = Me gusta mucho. Responde ÚNICAMENTE un JSON de una línea con "
+    "vocacional en una escala Likert de 1 a 5, usando esta rúbrica exacta:\n"
+    "1 = No me gusta nada / rechazo total (ej. \"para nada\", \"no me llama\")\n"
+    "2 = Me gusta poco / mayormente no (ej. \"casi no\", \"poco, la verdad\")\n"
+    "3 = Indiferente / regular / neutral (ej. \"más o menos\", \"ni fu ni fa\", "
+    "\"regular nomás\")\n"
+    "4 = Me gusta bastante / en general sí (ej. \"bastante\", \"sí, me gusta\")\n"
+    "5 = Me gusta mucho / me encanta (ej. \"me fascina\", \"me encanta harto\")\n"
+    "Usa 2 y 4 cuando el texto exprese un grado matizado o parcial, no solo "
+    "los extremos 1, 3 y 5. Responde ÚNICAMENTE un JSON de una línea con "
     'las claves "valor" (entero 1-5, o null si el texto no expresa un '
     'nivel de agrado/desagrado interpretable) y "confianza" (número entre '
     "0 y 1). No agregues texto antes ni después del JSON. No expliques tu "

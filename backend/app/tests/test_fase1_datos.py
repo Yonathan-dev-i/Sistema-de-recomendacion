@@ -34,24 +34,24 @@ def test_validacion_de_arranque_no_lanza_excepcion():
     validar_alineacion_areas()
 
 
-def test_banco_de_preguntas_tiene_85_entradas():
+def test_banco_de_preguntas_tiene_34_entradas():
     preguntas = cargar_preguntas()
-    assert len(preguntas) == 85
+    assert len(preguntas) == 34
     validar_banco_preguntas()  # no debe lanzar
 
 
-def test_preguntas_ids_son_1_a_85_sin_huecos():
+def test_preguntas_ids_son_1_a_34_sin_huecos():
     preguntas = cargar_preguntas()
     ids = sorted(p["id"] for p in preguntas)
-    assert ids == list(range(1, 86))
+    assert ids == list(range(1, 35))
 
 
-def test_cada_area_tiene_exactamente_5_preguntas():
+def test_cada_area_tiene_exactamente_2_preguntas():
     preguntas = cargar_preguntas()
     conteo_por_area: dict[str, int] = {}
     for p in preguntas:
         conteo_por_area[p["area"]] = conteo_por_area.get(p["area"], 0) + 1
-    assert conteo_por_area == {area: 5 for area in AREAS}
+    assert conteo_por_area == {area: 2 for area in AREAS}
 
 
 def test_validar_alineacion_falla_explicitamente_si_falta_un_area(monkeypatch):

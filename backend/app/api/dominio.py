@@ -30,7 +30,7 @@ async def listar_areas(db: AsyncSession = Depends(get_db)) -> list[Area]:
 
 @router.get("/preguntas", response_model=list[PreguntaOut])
 async def listar_preguntas(db: AsyncSession = Depends(get_db)) -> list[dict]:
-    """Devuelve las 85 preguntas del banco, ordenadas por id."""
+    """Devuelve las 34 preguntas del banco, ordenadas por id."""
     result = await db.execute(select(Pregunta).order_by(Pregunta.id))
     preguntas = result.scalars().all()
     return [{"id": p.id, "area": p.area_key, "texto": p.texto} for p in preguntas]

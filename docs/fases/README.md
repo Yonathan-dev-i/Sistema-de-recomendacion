@@ -15,7 +15,7 @@ tener que leer todo el código.
 | # | Fase | Resumen |
 |---|---|---|
 | 0 | [Preparación del proyecto (andamiaje)](fase-0-andamiaje.md) | Esqueleto de frontend y backend corriendo y comunicándose vía un endpoint de salud, sin lógica de negocio todavía. |
-| 1 | [Datos base y modelos](fase-1-datos-modelos.md) | Las 17 áreas, 85 preguntas y 37 carreras (con su perfil de 17 puntajes) en PostgreSQL, con migraciones y seed reproducible. |
+| 1 | [Datos base y modelos](fase-1-datos-modelos.md) | Las 17 áreas, 34 preguntas y 37 carreras (con su perfil de 17 puntajes) en PostgreSQL, con migraciones y seed reproducible. |
 | 2 | [Motor de recomendación (Mahalanobis)](fase-2-motor-mahalanobis.md) | Algoritmo de Distancia de Mahalanobis funcionando y testeado de forma aislada. |
 | 3 | [Lógica Adaptativa de Preguntas](fase-3-logica-adaptativa.md) | Módulo compartido de recorte/extensión de preguntas por área, independiente del método de test. |
 | 4 | [Test Tradicional (formulario) end-to-end](fase-4-test-tradicional.md) | Primer flujo completo usable: formulario → cálculo de vector → Top 5 → persistencia del intento. |

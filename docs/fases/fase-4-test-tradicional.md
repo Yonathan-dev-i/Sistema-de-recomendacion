@@ -28,7 +28,7 @@ en PostgreSQL, y muestra una pantalla de resultados básica.
     `construir_vector_usuario` (Fase 3) y devuelve también la lista de
     `pregunta_id` efectivamente usados (para persistir solo esas filas).
 - **`backend/app/schemas/test_tradicional.py`**: `TestTradicionalIn`
-  (`respuestas: list[{pregunta_id, respuesta}]`, longitud 17-85, sin ids
+  (`respuestas: list[{pregunta_id, respuesta}]`, longitud 17-34, sin ids
   repetidos) y `TestTradicionalOut` (`test_id`, `vector_usuario`,
   `resultados` — reutiliza `ResultadoCarreraOut` de la Fase 2).
 - **`backend/app/api/test.py`**: `POST /test/tradicional`. Orquesta:
@@ -40,7 +40,7 @@ en PostgreSQL, y muestra una pantalla de resultados básica.
      por request).
   4. Persiste un `IntentoTest` (`metodo=TRADICIONAL`, `estado=COMPLETADO`,
      `vector_usuario`, `top5_resultado` como snapshot JSON) y una fila
-     `RespuestaTest` por cada pregunta **realmente formulada** (nunca las 85).
+     `RespuestaTest` por cada pregunta **realmente formulada** (nunca las 34).
   5. Devuelve `test_id`, `vector_usuario` y el Top 5.
 - Router registrado en `backend/app/main.py`.
 
@@ -104,7 +104,7 @@ en PostgreSQL, y muestra una pantalla de resultados básica.
   efectivamente consumió (`preguntas_usadas`), tal como exige el prompt
   maestro en "Impacto en el resto del sistema": *"la tabla de respuestas debe
   guardar (...) qué pregunta_id fueron efectivamente mostradas y respondidas
-  (no todas las 85 tendrán una fila)"*.
+  (no todas las 34 tendrán una fila)"*.
 - **Edición retroactiva simplificada al alcance de la Fase 4.** El frontend sí
   recalcula en vivo el número de preguntas de un área cuando se edita una
   respuesta anterior (requisito explícito de la Fase 4/sección Método 1), y
@@ -131,8 +131,8 @@ en PostgreSQL, y muestra una pantalla de resultados básica.
 
 | Criterio | Método de verificación | Resultado |
 |---|---|---|
-| Un usuario puede completar el test tradicional de principio a fin y ver un Top 5 real, calculado con Mahalanobis sobre sus respuestas | `npx next build` sin errores + smoke test end-to-end vía `TestClient` (FastAPI) contra una base SQLite en memoria sembrada con las 17 áreas, 85 preguntas y 37 carreras reales: `POST /test/tradicional` con respuesta=1 en la primera pregunta de cada área → `200 OK` con `test_id`, `vector_usuario` (17 claves en 1.0) y Top 5 real (`afinidad_pct` 100.0 → 96.9 → ... ordenado) | ✅ |
-| El número de preguntas mostradas por área varía según las respuestas, verificable manualmente con los casos de la Fase 3 | `app/tests/test_fase4_tradicional.py`: caso mixto reproduce exactamente el ejemplo `[3, 5, 4]` → 3 preguntas de la Fase 3 dentro del flujo completo del formulario (16 áreas con 1 pregunta + matemática con 3 = 19 preguntas usadas) | ✅ |
+| Un usuario puede completar el test tradicional de principio a fin y ver un Top 5 real, calculado con Mahalanobis sobre sus respuestas | `npx next build` sin errores + smoke test end-to-end vía `TestClient` (FastAPI) contra una base SQLite en memoria sembrada con las 17 áreas, 34 preguntas y 37 carreras reales: `POST /test/tradicional` con respuesta=1 en la primera pregunta de cada área → `200 OK` con `test_id`, `vector_usuario` (17 claves en 1.0) y Top 5 real (`afinidad_pct` 100.0 → 96.9 → ... ordenado) | ✅ |
+| El número de preguntas mostradas por área varía según las respuestas, verificable manualmente con los casos de la Fase 3 | `app/tests/test_fase4_tradicional.py`: caso mixto reproduce el ejemplo `[3, 5]` (adaptado al banco de 2 preguntas/área) dentro del flujo completo del formulario (16 áreas con 1 pregunta + matemática con 2 = 18 preguntas usadas) | ✅ |
 | Los datos del intento quedan persistidos en PostgreSQL | El endpoint hace `db.add(IntentoTest(...))` + `db.flush()` + `db.add(RespuestaTest(...))` por cada pregunta usada + `db.commit()`; verificado en el smoke test (SQLite, mismo motor SQLAlchemy async) que devuelve `test_id: 1` tras el `commit`, confirmando que la fila se creó y obtuvo id | ✅ (verificado con SQLAlchemy async real; pendiente de una verificación manual adicional contra PostgreSQL real en un entorno con la base levantada, ver sección 6) |
 | (Implícito) el payload debe ser rechazado si no es consistente con la Lógica Adaptativa | Smoke test: enviar una respuesta "sobrante" (pregunta que no correspondía) → `422` con `detail` explicando cuál pregunta sobra | ✅ |
 | Linters pasan sin errores | `ruff check app/` (backend) y `npx eslint src/` (frontend) | ✅ ambos "sin errores" |
@@ -143,9 +143,10 @@ en PostgreSQL, y muestra una pantalla de resultados básica.
 - **Automatizadas (`backend/app/tests/test_fase4_tradicional.py`, 6 tests):**
   - Presupuesto mínimo (respuesta 1 en las 17 áreas) → 17 preguntas usadas,
     vector con las 17 claves en 1.0.
-  - Presupuesto máximo (respuesta 5 constante) → 85 preguntas usadas, vector
+  - Presupuesto máximo (respuesta 5 constante) → 34 preguntas usadas, vector
     en 5.0.
-  - Caso mixto que reproduce el ejemplo `[3, 5, 4]` de la Fase 3 dentro del
+  - Caso mixto que reproduce el ejemplo `[3, 5]` (adaptado al banco de 2
+    preguntas/área) de la Fase 3 dentro del
     flujo completo de 17 áreas.
   - Rechazo por respuesta faltante que sí correspondía formular.
   - Rechazo por respuesta sobrante más allá del presupuesto adaptativo.
